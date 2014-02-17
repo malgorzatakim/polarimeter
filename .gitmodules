@@ -1,0 +1,3 @@
+[submodule "pumpy"]
+	path = pumpy
+	url = git@github.com:jdmgroup/pumpy.git
