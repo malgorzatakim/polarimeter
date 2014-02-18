@@ -1,5 +1,6 @@
 import pumpy.pumpy as pumpy
 import rheodyne.rheodyne as rheodyne
+import autosampler.autosampler as autosampler
 import math
 
 # Variables
@@ -10,6 +11,9 @@ waste = 10 # waste position on selector
 waste_rinse_vol = 100 # uL
 fr_carrier = 100 # uL/min
 fr_substrate = 100 # uL/min
+
+# Configure autosampler
+sampler = autosampler.Autosampler('COM3')
 
 # Configure Arduino Rheodyne selector/six-port valve controller
 rheo = rheodyne.Rheodyne('COM7')
@@ -41,10 +45,13 @@ subcat.setflowrate(fr_substrate)
 for pump in [pull, push, carrier, subcat]:
     pump.infuse()
 
+sampler.valve(True)
+sampler.advance()
 rheo.valve(True)
 rheo.selector(2)
 rheo.valve(False)
 rheo.selector(7)
+sampler.valve(False)
 
 for pump in [pull, push, carrier, subcat]:
     pump.stop()
