@@ -1,57 +1,120 @@
+from __future__ import print_function 
 import pumpy.pumpy as pumpy
 import rheodyne.rheodyne as rheodyne
 import autosampler.autosampler as autosampler
 import math
+import sys
+import argparse
 
-# Variables
-IL_length = 100 # mm
-IL_ID = 1 # mm
-IL_vol = math.pi * (IL_ID/2.0)**2 * IL_length # uL
-waste = 10 # waste position on selector
-waste_rinse_vol = 100 # uL
-fr_carrier = 100 # uL/min
-fr_substrate = 100 # uL/min
+# Units used throughout
+# length: mm
+# volume: uL (mm^3)
+# time: minutes
 
-# Configure autosampler
-sampler = autosampler.Autosampler('COM3')
+# Set up the command line argument parser
+parser = argparse.ArgumentParser(description='dcb reactor')
+parser.add_argument('-p',dest='primed',help='Indicates additives already primed',action="store_true")
+args = parser.parse_args()
+
+# Injection loop volume
+il_vol = int(math.pi * (1.0/2)**2 * 1000)
+
+# Create chain object for syringe pumps 
+chain = pumpy.Chain('COM1',verbose=True)
+
+# Create syringe objects and configure pumps
+# addpull: withdraws additive from selector and into IL
+addpull = pumpy.Pump(chain,1,verbose=True)
+addpull.setdiameter(12.06) # BD Plastipak 5 mL
+
+# addpush: injects into IL to push additive out
+addpush = pumpy.Pump(chain,2,verbose=True)
+addpush.setdiameter(19.13) # BD Plastipak 20 mL
+addpush.setflowrate(500)
+
+# subcat: injects substrate and catalyst
+subcat = pumpy.PHD2000(chain,3,verbose=True)
+subcat.setdiameter(19.13) # BD Plastipak 20 mL
+subcat.setflowrate(500)
+subcat.settargetvolume(il_vol)
 
 # Configure Arduino Rheodyne selector/six-port valve controller
 rheo = rheodyne.Rheodyne('COM7')
 
-# Configure pump chain
-chain = pumpy.Chain('COM1')
+# Configure Arduino autosampler
+sampler = autosampler.Autosampler('COM3')
 
-# Configure additive withdrawer - withdraws from selector and into IL
-pull = pumpy.Pump(chain,1) # 
-pull.setdiameter(14.5)
-pull.setflowrate(500)
+# Selector rinse
+waste = 10 # waste position
+waste_vol = 250 # volume to expell
 
-# Configure additive pusher - pushes additive out of IL into reactor
-push = pumpy.Pump(chain,2) 
-push.setdiameter(14.5)
-push.setflowrate(500)
+# Additives in selector positions
+additives = [1,2]
 
-# Configure carrier fluid
-carrier = pumpy.Pump(chain,3)
-carrier.setdiameter(15)
-carrier.setflowrate(fr_carrier)
+# Priming procedure. Use -p flag to skip.
+if not args.primed:
+	# Volume of tubing connecting the selector valve and additive reservoirs
+	prime_vol = math.pi * (0.8/2.0)**2 * 650 # uL
 
-# Configure substrate and catalyst (same pump, PHD2000)
-subcat = pumpy.PHD2000(chain,4)
-subcat.setdiameter(15)
-subcat.setflowrate(fr_substrate)
+	# Going to withdraw prime_vol * number of additives into injection loop
+	# Make sure that the injection loop can accommodate this
+	if prime_vol * len(additives) > il_vol:
+		print('Error: injection loop can\'t accomodate',len(additives),'*',prime_vol,' uL for priming')
+		sys.exit()
+	else:
+		print('Priming: starting')
+		
+		rheo.valve(True) # 6-port load
 
-# Tests
-for pump in [pull, push, carrier, subcat]:
-    pump.infuse()
+		for additive in additives:
+			print('Priming: additive ',additive,'of',len(additives))
 
-sampler.valve(True)
-sampler.advance()
-rheo.valve(True)
-rheo.selector(2)
-rheo.valve(False)
-rheo.selector(7)
-sampler.valve(False)
+			# Prime additive
+			rheo.selector(additive)
+			addpull.settargetvolume(prime_vol * 1.2) # deliberately overfill
+			addpull.withdraw()
+			addpull.waituntiltarget()
 
-for pump in [pull, push, carrier, subcat]:
-    pump.stop()
+			# Expel that volume from IL
+			rheo.selector(waste)
+			addpull.settargetvolume(prime_vol * 1.4) # deliberately even more
+			addpull.infuse()
+			addpull.waituntiltarget()
+
+		print('Priming: complete')
+
+# Next inject additives one by one
+
+addpull.settargetvolume(il_vol)
+addpush.settargetvolume(il_vol*1.2) # deliberately expell more
+
+rf = 1000 # flow rate of substrate, additive and catalysts.
+subcat.setflowrate(rf)
+addpush.setflowrate(rf)
+
+for additive in additives:
+	print('Additive: ',additive,'of',len(additives))
+	
+	# Load into IL
+ 	rheo.valve(True) # 6-port load
+ 	rheo.selector(additive) # selector to additive
+ 	addpull.setflowrate(500)
+ 	addpull.withdraw()
+ 	addpull.waituntiltarget()
+
+ 	# Rinse selector
+ 	rheo.selector(waste)
+ 	addpull.setflowrate(rf)
+ 	addpull.infuse()
+ 	# N.B. no waituntiltarget() because the next step will take longer
+
+	# Inject IL
+ 	rheo.valve(False) # 6-port inject
+ 	addpush.infuse()
+ 	subcat.infuse()
+ 	addpush.waituntiltarget()
+
+ 	sampler.advance()
+
+rheo.close()
+chain.close()
