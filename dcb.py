@@ -89,7 +89,7 @@ if not args.primed:
 # Next inject additives one by one
 
 addpull.settargetvolume(il_vol)
-addpush.settargetvolume(il_vol*1.2) # deliberately expell more
+addpush.settargetvolume(il_vol*1.3) # deliberately expell more
 
 rf = 1000 # flow rate of substrate, additive and catalysts.
 subcat.setflowrate(rf)
