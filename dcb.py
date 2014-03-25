@@ -5,6 +5,9 @@ import autosampler.autosampler as autosampler
 import math
 import sys
 import argparse
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # Units used throughout
 # length: mm
@@ -20,20 +23,20 @@ args = parser.parse_args()
 il_vol = int(math.pi * (1.0/2)**2 * 1000)
 
 # Create chain object for syringe pumps 
-chain = pumpy.Chain('COM1',verbose=True)
+chain = pumpy.Chain('COM1')
 
 # Create syringe objects and configure pumps
 # addpull: withdraws additive from selector and into IL
-addpull = pumpy.Pump(chain,1,verbose=True)
+addpull = pumpy.Pump(chain,1,name='add pull')
 addpull.setdiameter(12.06) # BD Plastipak 5 mL
 
 # addpush: injects into IL to push additive out
-addpush = pumpy.Pump(chain,2,verbose=True)
+addpush = pumpy.Pump(chain,2,name='add push')
 addpush.setdiameter(19.13) # BD Plastipak 20 mL
 addpush.setflowrate(500)
 
 # subcat: injects substrate and catalyst
-subcat = pumpy.PHD2000(chain,3,verbose=True)
+subcat = pumpy.PHD2000(chain,3,name='subcat')
 subcat.setdiameter(19.13) # BD Plastipak 20 mL
 subcat.setflowrate(500)
 subcat.settargetvolume(il_vol)
@@ -59,15 +62,15 @@ if not args.primed:
 	# Going to withdraw prime_vol * number of additives into injection loop
 	# Make sure that the injection loop can accommodate this
 	if prime_vol * len(additives) > il_vol:
-		print('Error: injection loop can\'t accomodate',len(additives),'*',prime_vol,' uL for priming')
+		logging.critical('Injection loop can\'t accomodate',len(additives),'*',prime_vol,' uL for priming')
 		sys.exit()
 	else:
-		print('Priming: starting')
+		logging.info('Begin priming procedure')
 		
 		rheo.valve(True) # 6-port load
 
 		for additive in additives:
-			print('Priming: additive ',additive,'of',len(additives))
+			logging.info('Priming additive %s of %s',additive,len(additives))
 
 			# Prime additive
 			rheo.selector(additive)
@@ -81,7 +84,7 @@ if not args.primed:
 			addpull.infuse()
 			addpull.waituntiltarget()
 
-		print('Priming: complete')
+		logging.info('Priming procedure complete')
 
 # Next inject additives one by one
 
@@ -93,7 +96,7 @@ subcat.setflowrate(rf)
 addpush.setflowrate(rf)
 
 for additive in additives:
-	print('Additive: ',additive,'of',len(additives))
+	logging.info('Additive %s of %s',additive,len(additives))
 	
 	# Load into IL
  	rheo.valve(True) # 6-port load

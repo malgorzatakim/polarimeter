@@ -2,6 +2,7 @@ from __future__ import print_function
 import serial
 import time
 import argparse
+import logging
 
 # Selector
 class Rheodyne:
@@ -9,20 +10,20 @@ class Rheodyne:
         self.serial = serial.Serial(port,timeout=2)
         time.sleep(2) # need to wait for Arduino to reset itself after open
         if self.serial.isOpen():
-            print('Rheodyne: created on',port)
+            logging.info('Rheodyne: opened on %s',port)
         else:
-            error('Rheodyne: ERROR - not opened on',port)
+            logging.error('Rheodyne: could not open on %s',port)
 
     def selector(self,position):
         if position > 0 and position < 11:
             self.serial.write('S' + str(position-1))
             response = self.serial.readline()
             if not response.startswith('done'):
-                self.error('Rheodyne: unexpected response from selector',response)
+                logging.error('Rheodyne: unexpected response from selector')
             else:
-                print('Rheodyne: selector set to',position)
+                logging.info('Rheodyne: selector set to %s',position)
         else:
-            print('ERROR: invalid position')
+            logging.error('Rheodyne: %s is an invalid position',position)
 
     def valve(self,inject):
         if inject:
@@ -36,19 +37,16 @@ class Rheodyne:
             
         response = self.serial.readline()
         if not response.startswith('done'):
-            self.error('Rheodyne: unexpected response from valve',response)
+            logging.error('Rheodyne: unexpected response from valve')
         else:
-            print('Rheodyne: six port set to ',status)
+            logging.info('Rheodyne: six port %s',status)
     
     def close(self):
         self.serial.close()
         if not self.serial.isOpen():
-            print('Rheodyne: serial port closed OK')
+            logging.info('Rheodyne: serial port closed')
         else:
-            print('Rheodyne: ERROR - serial port not closed')
-
-    def error(*msg):
-        print('Error:',msg)
+            logging.error('Rheodyne: could not close serial port')
 
 # Command line options
 # Run with -h flag to see help
