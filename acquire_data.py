@@ -61,27 +61,31 @@ def main(samples,sample_rate):
     # provide times samples were taken
     time = np.arange(0,1.0*samples/sample_rate,1.0/sample_rate)
     
-    # print output
-    print 'time (s), chA (V), chB (V)'
+    # print output: time (s), chA (V), chB (V)
     for t, chA, chB in zip(time, chA, chB):
         print '%f,%f,%f' % (t, chA, chB)
 
 if __name__ == '__main__':
+    # defaults
+    samples = 5000
+    sample_rate = 10000
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', dest='samples',
-                        help='number of samples to acquire', type=int)
-    parser.add_argument('-r', dest='sample_rate', help='samples/second',
-                        type=int)
+                        help='number of samples to acquire (default %i)'
+                        % samples, type=int)
+    parser.add_argument('-r', dest='sample_rate', help='samples/second (default'
+                        ' %i)' % sample_rate, type=int)
+    parser.add_argument('-header', help='print header row', action='store_true')
     args = parser.parse_args()
 
     if args.samples:
         samples = args.samples
-    else:
-        samples = 5000
 
     if args.sample_rate:
         sample_rate = args.sample_rate
-    else:
-        sample_rate = 10000
+
+    if args.header:
+        print 'time (s), chA (V), chB (V)'
 
     main(samples=samples,sample_rate=sample_rate)
