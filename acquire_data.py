@@ -70,7 +70,8 @@ if __name__ == '__main__':
     samples = 5000
     sample_rate = 10000
     
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Acquire data with BitScope on'
+                                     ' channels A and B and print to stdout.')
     parser.add_argument('-n', dest='samples',
                         help='number of samples to acquire (default %i)'
                         % samples, type=int)
