@@ -13,6 +13,10 @@ Servo gimbal;
 const int laser = 11; // PWM to control laser intensity
 const int gimbalPower = 2; // to transistor to switch power to gimbal
 
+// need to keep track of gimbal status because if it's already on
+// and you try and turn it on it will stop and then restart.
+boolean gimbalOn = false;
+
 void setup() 
 { 
   Serial.begin(9600);
@@ -34,23 +38,24 @@ void loop()
   if (Serial.available() > 0) {
       int msg = Serial.read();
       
-      if (msg == 76) {
-        // L = laser on
+      if (msg == 76) {          // L = laser on
         analogWrite(laser,255);
         Serial.print("1");
-      } else if (msg == 108) {
-        // l = laser off
+      } else if (msg == 108) {  // l = laser off
         analogWrite(laser,0);
         Serial.print("1");
-      } else if (msg == 71) {
-        // G = start
-        startGimbal();
+      } else if (msg == 71) {   // G = start
+        // only switch it on if it's not running
+        if (gimbalOn == false) {
+          startGimbal();
+          gimbalOn = true;
+        }
         Serial.print("1");
-      } else if (msg = 103) {
-        // g = stop
+      } else if (msg = 103) {   // g = stop
         gimbal.write(0);
         digitalWrite(gimbalPower, LOW);
         Serial.print("1");
+        gimbalOn = false;
       }
   }
 }
