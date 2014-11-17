@@ -37,12 +37,24 @@ def main(samples,sample_rate):
     and it should be the first parameter assigned when preparing a
     new trace. Note that if this sample rate can't be selected, the
     nearest sample rate will be returned."""
-    assert BL_Rate(sample_rate) == sample_rate
+    try:
+        actual_sample_rate = BL_Rate(sample_rate)
+        assert sample_rate == actual_sample_rate
+    except AssertionError:
+        print('Maximum sample rate of %i sps available. Requested sample rate '
+            'of %i sps.' % (actual_sample_rate, sample_rate))
+        raise AssertionError
 
     """Next is number of samples. Returned value is actual number of
     samples returned."""
-    assert samples == BL_Size(samples)
-    
+    try:
+        actual_samples = BL_Size(samples)
+        assert samples == actual_samples
+    except AssertionError:
+        print('Maximum of %i samples available. Requested %i samples'
+              % (actual_samples, samples))
+        raise AssertionError
+
     # do trace, acquire data
     BL_Trace()
 
