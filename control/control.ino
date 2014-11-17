@@ -12,10 +12,15 @@
 Servo gimbal;
 const int laser = 11; // PWM to control laser intensity
 const int gimbalPower = 2; // to transistor to switch power to gimbal
+const int voltageCheckPin = 1; // analog pin
+boolean voltageOk = false; // start false because it hasn't been checked yet
 
 // need to keep track of gimbal status because if it's already on
 // and you try and turn it on it will stop and then restart.
 boolean gimbalOn = false;
+
+// keep track of laser
+boolean laserOn = false;
 
 void setup() 
 { 
@@ -34,30 +39,56 @@ void setup()
 } 
  
 void loop() 
-{
+{  
   if (Serial.available() > 0) {
       int msg = Serial.read();
       
-      if (msg == 76) {          // L = laser on
-        analogWrite(laser,255);
-        Serial.print("1");
-      } else if (msg == 108) {  // l = laser off
-        analogWrite(laser,0);
-        Serial.print("1");
-      } else if (msg == 71) {   // G = start
-        // only switch it on if it's not running
-        if (gimbalOn == false) {
-          startGimbal();
-          gimbalOn = true;
+      voltageOk = voltageCheck();
+        
+      if (voltageOk == true) {     
+        if (msg == 76) {          // L = laser on
+          laserStart();
+          Serial.print("1");
+        } else if (msg == 108) {  // l = laser off
+          laserStop();
+          Serial.print("1");
+        } else if (msg == 71) {   // G = start
+          // only switch it on if it's not running
+          if (gimbalOn == false) {
+            startGimbal();
+            gimbalOn = true;
+          }
+          Serial.print("1");
+        } else if (msg = 103) {   // g = stop
+          stopGimbal();
+          Serial.print("1");
         }
-        Serial.print("1");
-      } else if (msg = 103) {   // g = stop
-        gimbal.write(0);
-        digitalWrite(gimbalPower, LOW);
-        Serial.print("1");
-        gimbalOn = false;
+      } else {
+        // Arduino isn't connected to the power supply; respond to all
+        // commands with V
+        Serial.print("V");
       }
   }
+  
+  // check if the power has gone off
+  voltageOk = voltageCheck();
+  
+  // if power has gone off and stuff is on, switch it off
+  if (voltageOk == false && gimbalOn == true) {
+    stopGimbal();
+  } else if (voltageOk == false && laserOn == true) {
+    laserStop();
+  }
+}
+
+void laserStart() {
+  analogWrite(laser,255);
+  laserOn = true;
+}
+
+void laserStop() {
+  analogWrite(laser,0);
+  laserOn = false;
 }
 
 void startGimbal()
@@ -70,5 +101,23 @@ void startGimbal()
     gimbal.write(i);
     delay(25); // picked this value by trial and error
     //Serial.println(i);
+  }
+}
+
+void stopGimbal() {
+  gimbal.write(0);
+  digitalWrite(gimbalPower, LOW);
+  gimbalOn = false;
+}
+
+bool voltageCheck() {
+  // do voltage check
+  int val = analogRead(voltageCheckPin);
+  // through fiddling/debugging, val around 520 means that it's powered off
+  // the power supply. Around 300, means it's on the USB.
+  if (val > 500) {
+    return true;
+  } else {
+    return false;
   }
 }

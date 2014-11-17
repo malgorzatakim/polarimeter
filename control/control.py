@@ -24,10 +24,14 @@ class Controller():
 		else:
 			self.connection.write('l') # laser off
 
-		if self.connection.read(1) != '1':
-			raise ControllerError('No response to laser command')
-		else:
+		resp = self.connection.read(1)
+
+		if resp == 'V':
+			raise PowerError
+		elif resp == '1':
 			self.laserPower = power
+		else:
+			raise ControllerError('No response to laser command')
 
 		logging.info('Laser power: %s', str(self.laserPower))
 		return self.laserPower
@@ -40,10 +44,14 @@ class Controller():
 		else:
 			self.connection.write('g') # gimbal off
 
-		if self.connection.read(1) != '1':
-			raise ControllerError('No response to gimbal command')
-		else:
+		resp = self.connection.read(1) 
+
+		if resp == 'V':
+			raise PowerError
+		elif resp == '1':
 			self.gimbalPower = power
+		else:
+			raise ControllerError('No response to gimbal command')
 
 		logging.info('Gimbal power: %s', str(self.gimbalPower))
 		return self.gimbalPower
@@ -53,6 +61,12 @@ class Controller():
 										  str(self.gimbalPower))
 
 class ControllerError(Exception):
+	pass
+
+class PowerError(Exception):
+	"""PowerError raised when the controller box does not have 12 V
+	supply.
+	"""
 	pass
 
 if __name__ == '__main__':
