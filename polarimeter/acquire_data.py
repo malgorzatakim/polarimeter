@@ -85,12 +85,10 @@ def main(samples,sample_rate):
     # provide times samples were taken
     time = np.arange(0,1.0*samples/sample_rate,1.0/sample_rate)
     
-    # print output: time (s), chA (V), chB (V)
-    for t, chA, chB in zip(time, chA, chB):
-        print '%f,%f,%f' % (t, chA, chB)
-
     # change directory to where we were at the start
     os.chdir(intial_dir)
+
+    return time, chA, chB
 
 if __name__ == '__main__':
     # defaults
@@ -116,4 +114,8 @@ if __name__ == '__main__':
     if args.header:
         print 'time (s), chA (V), chB (V)'
 
-    main(samples=samples,sample_rate=sample_rate)
+    time, chA, chB = main(samples=samples,sample_rate=sample_rate)
+
+    # print output: time (s), chA (V), chB (V)
+    for t, chA, chB in zip(time, chA, chB):
+        print '%f,%f,%f' % (t, chA, chB)
