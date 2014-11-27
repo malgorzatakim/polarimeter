@@ -1,8 +1,20 @@
 from bitlib import *
 import numpy as np
 import argparse
+import os
 
 def main(samples,sample_rate):
+    """Acquire specified number of samples at a specified sample rate on
+     channels A and B."""
+
+    """The BitScope library is stupid. It changes the working directory
+    to whatever connection the BitScope is on and doesn't put it back
+    afterwards. Makes importing this as a module a nightmare, because
+    you try to reload the module and the Python interpreter can't find
+    it. Get the current working directory, store it, then change back to
+    the directory at the end. Terrible."""
+    intial_dir = os.getcwd()
+
     assert BL_Open() == 1 # returns number devices opened
 
     """First, must select device. Returns index of selected entity.
@@ -76,6 +88,9 @@ def main(samples,sample_rate):
     # print output: time (s), chA (V), chB (V)
     for t, chA, chB in zip(time, chA, chB):
         print '%f,%f,%f' % (t, chA, chB)
+
+    # change directory to where we were at the start
+    os.chdir(intial_dir)
 
 if __name__ == '__main__':
     # defaults
