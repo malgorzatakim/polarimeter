@@ -3,8 +3,16 @@ from scipy.signal import correlate
 from scipy.fftpack import fft, fftfreq
 
 class PolarimeterData:
-	def __init__(self, filename):
-		self.t, self.chA, self.chB = self.load_file(filename)
+	def __init__(self, filename=None, t=None, chA=None, chB=None):
+		if filename is not None:
+			self.t, self.chA, self.chB = self.load_file(filename)
+		elif t is not None and chA is not None and chB is not None:
+			self.t = np.array(t)
+			self.chA = np.array(chA)
+			self.chB = np.array(chB)
+		else:
+			raise ValueError('Provide a filename or t, chA and chB')
+
 		self.rotation = 360 * self.calc_time_delay() * self.calc_motor_freq()
 
 	def load_file(self, filename):
