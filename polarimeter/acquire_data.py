@@ -53,9 +53,9 @@ def main(samples,sample_rate):
         actual_sample_rate = BL_Rate(sample_rate)
         assert sample_rate == actual_sample_rate
     except AssertionError:
-        print('Maximum sample rate of %i sps available. Requested sample rate '
-            'of %i sps.' % (actual_sample_rate, sample_rate))
-        raise AssertionError
+        raise AssertionError('Maximum sample rate of %i sps available. '
+                             'Requested %i sps.' % (actual_sample_rate, 
+                                                    sample_rate))
 
     """Next is number of samples. Returned value is actual number of
     samples returned."""
@@ -63,9 +63,8 @@ def main(samples,sample_rate):
         actual_samples = BL_Size(samples)
         assert samples == actual_samples
     except AssertionError:
-        print('Maximum of %i samples available. Requested %i samples'
-              % (actual_samples, samples))
-        raise AssertionError
+        raise AssertionError('Maximum of %i samples available. Requested %i '
+                             'samples.' % (actual_samples, samples))
 
     # do trace, acquire data
     BL_Trace()
