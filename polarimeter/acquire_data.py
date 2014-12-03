@@ -3,16 +3,12 @@ import bitlib as bl
 import argparse
 import os
 
-def main(samples,sample_rate):
+def main(samples, sample_rate):
     """Acquire specified number of samples at a specified sample rate on
      channels A and B."""
 
-    """The BitScope library is stupid. It changes the working directory
-    to whatever connection the BitScope is on and doesn't put it back
-    afterwards. Makes importing this as a module a nightmare, because
-    you try to reload the module and the Python interpreter can't find
-    it. Get the current working directory, store it, then change back to
-    the directory at the end. Terrible."""
+    """BitScope library changes working directory. Need to change back
+    at the end of the function."""
     intial_dir = os.getcwd()
 
     assert bl.BL_Open() == 1 # returns number devices opened
@@ -39,7 +35,7 @@ def main(samples,sample_rate):
         bl.BL_Count(bl.BL_COUNT_RANGE). This returns 5. Can set the max
         range using bl.BL_Range(bl.BL_Count(bl.BL_COUNT_RANGE) (11 V)
         but I only want 5 V. This is an index of 3. bl.BL_Range returns
-        max voltage. """
+        max voltage."""
         assert bl.BL_Range(3) == 5.2
         
         # Enable the channel
@@ -66,27 +62,23 @@ def main(samples,sample_rate):
         raise AssertionError('Maximum of %i samples available. Requested %i '
                              'samples.' % (actual_samples, samples))
 
-    # do trace, acquire data
     bl.BL_Trace()
 
-    # get first channel
+    # get data from each channel
     channel = 0
     assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
     chA = bl.BL_Acquire()
 
-    # get second channel
     channel = 1
     assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
     chB = bl.BL_Acquire()
 
     bl.BL_Close()
 
-    # provide times samples were taken
     time = [t / sample_rate for t in range(0, samples)]
-
-    # change directory to where we were at the start
+    
     os.chdir(intial_dir)
-
+    
     return time, chA, chB
 
 if __name__ == '__main__':
@@ -113,8 +105,7 @@ if __name__ == '__main__':
     if args.header:
         print 'time (s), chA (V), chB (V)'
 
-    time, chA, chB = main(samples=samples,sample_rate=sample_rate)
+    time, chA, chB = main(samples=samples, sample_rate=sample_rate)
 
-    # print output: time (s), chA (V), chB (V)
     for t, chA, chB in zip(time, chA, chB):
         print '%f,%f,%f' % (t, chA, chB)
