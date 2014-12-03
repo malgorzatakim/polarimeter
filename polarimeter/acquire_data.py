@@ -1,5 +1,5 @@
+from __future__ import division
 from bitlib import *
-import numpy as np
 import argparse
 import os
 
@@ -82,8 +82,8 @@ def main(samples,sample_rate):
     BL_Close()
 
     # provide times samples were taken
-    time = np.arange(0,1.0*samples/sample_rate,1.0/sample_rate)
-    
+    time = [t / sample_rate for t in range(0, samples)]
+
     # change directory to where we were at the start
     os.chdir(intial_dir)
 
