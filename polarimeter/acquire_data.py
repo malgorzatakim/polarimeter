@@ -3,7 +3,7 @@ import bitlib as bl
 import argparse
 import os
 
-def main(samples, sample_rate):
+def main(samples, rate):
     """Acquire specified number of samples at a specified sample rate on
      channels A and B."""
 
@@ -46,12 +46,11 @@ def main(samples, sample_rate):
     new trace. Note that if this sample rate can't be selected, the
     nearest sample rate will be returned."""
     try:
-        actual_sample_rate = bl.BL_Rate(sample_rate)
-        assert sample_rate == actual_sample_rate
+        actual_rate = bl.BL_Rate(rate)
+        assert rate == actual_rate
     except AssertionError:
         raise AssertionError('Maximum sample rate of %i sps available. '
-                             'Requested %i sps.' % (actual_sample_rate, 
-                                                    sample_rate))
+                             'Requested %i sps.' % (actual_rate, rate))
 
     """Next is number of samples. Returned value is actual number of
     samples returned."""
@@ -75,7 +74,7 @@ def main(samples, sample_rate):
 
     bl.BL_Close()
 
-    time = [t / sample_rate for t in range(0, samples)]
+    time = [t / rate for t in range(0, samples)]
     
     os.chdir(intial_dir)
     
@@ -84,28 +83,28 @@ def main(samples, sample_rate):
 if __name__ == '__main__':
     # defaults
     samples = 5000
-    sample_rate = 10000
+    rate = 10000
     
     parser = argparse.ArgumentParser(description='Acquire data with BitScope on'
                                      ' channels A and B and print to stdout.')
     parser.add_argument('-n', dest='samples',
                         help='number of samples to acquire (default %i)'
                         % samples, type=int)
-    parser.add_argument('-r', dest='sample_rate', help='samples/second (default'
-                        ' %i)' % sample_rate, type=int)
+    parser.add_argument('-r', dest='rate', help='samples/second (default'
+                        ' %i)' % rate, type=int)
     parser.add_argument('-header', help='print header row', action='store_true')
     args = parser.parse_args()
 
     if args.samples:
         samples = args.samples
 
-    if args.sample_rate:
-        sample_rate = args.sample_rate
+    if args.rate:
+        rate = args.rate
 
     if args.header:
         print 'time (s), chA (V), chB (V)'
 
-    time, chA, chB = main(samples=samples, sample_rate=sample_rate)
+    time, chA, chB = main(samples=samples, rate=rate)
 
     for t, chA, chB in zip(time, chA, chB):
         print '%f,%f,%f' % (t, chA, chB)
