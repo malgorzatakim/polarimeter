@@ -1,64 +1,34 @@
 import numpy as np
-from scipy.signal import correlate
-from scipy.fftpack import fft, fftfreq
+from scipy.fftpack import ifft, fft, fftfreq
 
-class PolarimeterData:
-	def __init__(self, filename=None, t=None, chA=None, chB=None):
-		if filename is not None:
-			self.t, self.chA, self.chB = self.load_file(filename)
-		elif t is not None and chA is not None and chB is not None:
-			self.t = np.array(t)
-			self.chA = np.array(chA)
-			self.chB = np.array(chB)
-		else:
-			raise ValueError('Provide a filename or t, chA and chB')
+def calc_delta_phi(t, ref, obj):
+	f = fftfreq(len(ref), t[1]-t[0])
 
-		self.rotation = 360 * self.calc_time_delay() * self.calc_motor_freq()
+	# low pass filter
+	lp_filter = np.ones(len(f)) / (1 + ((f / 6)**2))   
+	ref = ifft(fft(ref) * lp_filter)
+	obj = ifft(fft(obj) * lp_filter)
 
-	def load_file(self, filename):
-		"""Return np arrays (time, chA, chB)"""
-		f = open(filename, 'r').read().rstrip()
-		data = [line.split(',') for line in f.split('\n')]
-		data = np.array(data, dtype='float')
-		return data[:,0], data[:,1], data[:,2]
+	# apodising filter (time domain)
+	a0 = 0.355768
+	a1 = 0.487396
+	a2 = 0.144232
+	a3 = 0.012604
+	n = np.arange(0,len(t),1)
+	apodize_filter =  (a0 - a1*np.cos(2*np.pi*n/len(t))
+					  + a2*np.cos(4*np.pi*n/len(t))
+					  - a3*np.cos(6*np.pi*n/len(t)))
+	ref *= apodize_filter
+	obj *= apodize_filter
 
-	def calc_time_delay(self):
-		"""Returns the time delay between the two signals.
+	# bp filter in freq domain
+	sig = 1
+	f0 = 3.5
+	bp_filter = np.exp(-(f-f0)**2 / (2*sig*sig))    
+	ref = ifft(fft(ref) * bp_filter)
+	obj = ifft(fft(obj) * bp_filter)
 
-		For a nice graph, you can plot time vs cross-correlation. But in
-		this context we just want the time delay, which is the time at
-		which the correlation is at its maximum.
-		"""
-		corr = correlate(self.chA, self.chB)
-		t = np.concatenate((self.t[::-1]*-1,self.t[1::]))
-		return t[corr.argmax()]
+	delta_phi = np.angle(ref * obj.conjugate())
 
-	def calc_motor_freq(self):
-		"""Do FFT on both channels to get the frequency of the motor's
-		rotation. They should be identical. If it isn't, something has
-		gone very wrong.
-		"""
-
-		def calc_fft(time, signal):
-			frequencies = fftfreq(signal.size, time[1]-time[0])
-			F = fft(signal)
-		
-			"""Next few lines taken from:
-			gribblelab.org/scicomp/09_Signals_sampling_filtering.html
-			Need to double check that this is strictly acceptable.
-			"""
-			ipos = frequencies > 0 
-			frequencies = frequencies[ipos] # only look at +ve freqs
-			magnitudes = abs(F[ipos]) # magnitude spectrum
-			return (frequencies, magnitudes)
-
-		# Calculate frequency-magnitude from time-voltage
-		chA_freq, chA_mag = calc_fft(self.t, self.chA)
-		chB_freq, chB_mag = calc_fft(self.t, self.chB)
-
-		# Get most intense frequency
-		chA_motor_freq = chA_freq[chA_mag.argmax()]
-		chB_motor_freq = chB_freq[chB_mag.argmax()]
-
-		assert chA_motor_freq == chB_motor_freq
-		return chA_freq[chA_mag.argmax()]
+	# exclude outer 25% because of edge effects
+	return np.mean(delta_phi[len(f)*0.25:len(f)*0.75])
