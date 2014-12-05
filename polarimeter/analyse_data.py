@@ -27,12 +27,12 @@ def calc_phase_difference(t, ref, obj):
 
 	# bp filter in freq domain
 	sig = 1
-	f0 = 3.5
+	f0 = 7
 	bp_filter = np.exp(-(f-f0)**2 / (2*sig*sig))    
 	ref = ifft(fft(ref) * bp_filter)
 	obj = ifft(fft(obj) * bp_filter)
 
-	delta_phi = np.angle(ref * obj.conjugate())
+	delta_phi = np.angle(obj * ref.conjugate()) / 2
 
 	# exclude outer 25% because of edge effects
 	return np.mean(delta_phi[len(f)*0.25:len(f)*0.75])
