@@ -1,7 +1,11 @@
+from __future__ import division
 import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
 
-def calc_delta_phi(t, ref, obj):
+def calc_phase_difference(t, ref, obj):
+	"""Calculate the phase difference between the reference and object
+	signals. Returns phase difference in radians.
+	"""
 	f = fftfreq(len(ref), t[1]-t[0])
 
 	# low pass filter
