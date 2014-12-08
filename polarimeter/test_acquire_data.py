@@ -7,25 +7,18 @@ class AcquireDataTestCase(unittest.TestCase):
 	"""Tests for acquire_data.py"""
 
 	def test_acquire_returns_as_expected(self):
-		samples = 6000
-		sample_rate = 1E6
-		time, chA, chB = acquire_data.main(samples, sample_rate)
+		capture_time = 0.25
+		time, chA, chB = acquire_data.main(capture_time)
 
-		self.assertTrue(len(time) == len(chA) == len(chB) == samples)
-		self.assertTrue(time[-1] == (samples-1) / sample_rate)
+		self.assertTrue(len(time) == len(chA) == len(chB))
+		self.assertAlmostEqual(time[-1] / capture_time, 1, places=3) # 0.1%
 		self.assertIsInstance(time, list)
 		self.assertIsInstance(chA, list)
 		self.assertIsInstance(chB, list)
 
-	def test_high_sample_rate_raises_exception(self):
-		self.assertRaises(AssertionError, acquire_data.main, 6000, 1E100)
-
-	def test_too_many_samples_raises_exception(self):
-		self.assertRaises(AssertionError, acquire_data.main, 60000, 1E10)
-
 	def test_directory_does_not_change(self):
 		initial_dir = os.getcwd()
-		time, chA, chB = acquire_data.main(6000, 1E6)
+		time, chA, chB = acquire_data.main(0.1)
 		final_dir = os.getcwd()
 		self.assertTrue(initial_dir == final_dir)
 

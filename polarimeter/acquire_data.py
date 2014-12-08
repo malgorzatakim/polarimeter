@@ -3,9 +3,15 @@ import bitlib as bl
 import argparse
 import os
 
-def main(samples, rate):
-    """Acquire specified number of samples at a specified sample rate on
-     channels A and B."""
+def main(capture_time):
+    """Acquire data from channels A and B for capture_time (seconds).
+    Automatically uses the highest sample rate possible. Note that the 
+    actual capture time may be slightly different to that requested.
+    Check t[-1].
+
+    Example:
+        t, chA, chB = main(10)
+    """
 
     """BitScope library changes working directory. Need to change back
     at the end of the function."""
@@ -37,29 +43,16 @@ def main(samples, rate):
         but I only want 5 V. This is an index of 3. bl.BL_Range returns
         max voltage."""
         assert bl.BL_Range(3) == 5.2
-        
+
         # Enable the channel
         assert bl.BL_Enable(True) == True
 
-    """Now do trace parameters. bl.BL_Rate must always be specified
-    and it should be the first parameter assigned when preparing a
-    new trace. Note that if this sample rate can't be selected, the
-    nearest sample rate will be returned."""
-    try:
-        actual_rate = bl.BL_Rate(rate)
-        assert rate == actual_rate
-    except AssertionError:
-        raise AssertionError('Maximum sample rate of %i sps available. '
-                             'Requested %i sps.' % (actual_rate, rate))
-
-    """Next is number of samples. Returned value is actual number of
-    samples returned."""
-    try:
-        actual_samples = bl.BL_Size(samples)
-        assert samples == actual_samples
-    except AssertionError:
-        raise AssertionError('Maximum of %i samples available. Requested %i '
-                             'samples.' % (actual_samples, samples))
+        # Set rate/size
+        bl.BL_Rate(bl.BL_MAX_RATE)
+        bl.BL_Size(bl.BL_MAX_SIZE)
+        actual_time = bl.BL_Time(capture_time)
+        actual_rate = bl.BL_Rate(bl.BL_ASK)
+        actual_size = bl.BL_Size(bl.BL_ASK)
 
     bl.BL_Trace()
 
@@ -74,37 +67,23 @@ def main(samples, rate):
 
     bl.BL_Close()
 
-    time = [t / rate for t in range(0, samples)]
+    time = [t / actual_rate for t in range(0, actual_size)]
     
     os.chdir(intial_dir)
     
     return time, chA, chB
 
 if __name__ == '__main__':
-    # defaults
-    samples = 5000
-    rate = 10000
-    
     parser = argparse.ArgumentParser(description='Acquire data with BitScope on'
                                      ' channels A and B and print to stdout.')
-    parser.add_argument('-n', dest='samples',
-                        help='number of samples to acquire (default %i)'
-                        % samples, type=int)
-    parser.add_argument('-r', dest='rate', help='samples/second (default'
-                        ' %i)' % rate, type=int)
+    parser.add_argument('time', help='capture time (seconds)', type=float)
     parser.add_argument('-header', help='print header row', action='store_true')
     args = parser.parse_args()
-
-    if args.samples:
-        samples = args.samples
-
-    if args.rate:
-        rate = args.rate
 
     if args.header:
         print 'time (s), chA (V), chB (V)'
 
-    time, chA, chB = main(samples=samples, rate=rate)
+    time, chA, chB = main(args.time)
 
     for t, chA, chB in zip(time, chA, chB):
         print '%f,%f,%f' % (t, chA, chB)
