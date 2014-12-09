@@ -27,6 +27,8 @@ class AcquireDataTestCase(unittest.TestCase):
 		time, chA, chB = acquire_data.main(0.01, repeat)
 		self.assertEqual(len(chA), repeat)
 		self.assertEqual(len(chB), repeat)
+		self.assertEqual(len(chA[0]), len(time))
+		self.assertEqual(len(chB[0]), len(time))
 
 if __name__ == '__main__':
 	unittest.main()
