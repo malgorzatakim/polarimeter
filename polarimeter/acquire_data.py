@@ -82,8 +82,8 @@ def main(capture_time, repeat=1):
 
         for i in range(repeat):
             a, b = do_measurement()
-            chA.append([a])
-            chB.append([b])
+            chA.append(a)
+            chB.append(b)
 
     bl.BL_Close()
 
