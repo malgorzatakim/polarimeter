@@ -40,21 +40,10 @@ def main(capture_time, repeat=1):
     channels = [0,1]
     for channel in channels:
         assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-
-        # not sure if this should be bnc
-        bl.BL_Select(bl.BL_SELECT_SOURCE,bl.BL_SOURCE_POD)
-
-        """Set the voltage range. Can get the number of ranges from
-        bl.BL_Count(bl.BL_COUNT_RANGE). This returns 5. Can set the max
-        range using bl.BL_Range(bl.BL_Count(bl.BL_COUNT_RANGE) (11 V)
-        but I only want 5 V. This is an index of 3. bl.BL_Range returns
-        max voltage."""
-        assert bl.BL_Range(3) == 5.2
-
-        # Enable the channel
+        assert bl.BL_Select(bl.BL_SELECT_SOURCE,bl.BL_SOURCE_POD) == 0
+        assert bl.BL_Range(2) == 3.5
+        assert bl.BL_Offset(-1.75) == -1.75
         assert bl.BL_Enable(True) == True
-
-        # Set rate/size
         bl.BL_Rate(bl.BL_MAX_RATE)
         bl.BL_Size(bl.BL_MAX_SIZE)
         actual_time = bl.BL_Time(capture_time)
