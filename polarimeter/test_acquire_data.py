@@ -10,7 +10,7 @@ class AcquireDataTestCase(unittest.TestCase):
 		capture_time = 0.25
 		time, chA, chB = acquire_data.main(capture_time)
 
-		self.assertTrue(len(time) == len(chA) == len(chB))
+		self.assertTrue(len(time) == len(chA[0]) == len(chB[0]))
 		self.assertAlmostEqual(time[-1] / capture_time, 1, places=3) # 0.1%
 		self.assertIsInstance(time, list)
 		self.assertIsInstance(chA, list)
