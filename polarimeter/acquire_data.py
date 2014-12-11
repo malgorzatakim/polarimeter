@@ -1,6 +1,7 @@
 from __future__ import division
 import bitlib as bl
 import argparse
+import logging
 import os
 
 def main(capture_time, repeat=1):
@@ -26,21 +27,29 @@ def main(capture_time, repeat=1):
 
     if bl.BL_Open():
         try:
-            assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
-            bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
+            # BitScope configuration
+            while True:
+                try:
+                    assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
+                    bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
 
-            channels = [0,1]
-            for channel in channels:
-                assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-                assert bl.BL_Select(bl.BL_SELECT_SOURCE,bl.BL_SOURCE_POD) == 0
-                assert bl.BL_Range(2) == 3.5
-                assert bl.BL_Offset(-1.75) == -1.75
-                assert bl.BL_Enable(True) == True
-                bl.BL_Rate(bl.BL_MAX_RATE)
-                bl.BL_Size(bl.BL_MAX_SIZE)
-                actual_time = bl.BL_Time(capture_time)
-                actual_rate = bl.BL_Rate(bl.BL_ASK)
-                actual_size = bl.BL_Size(bl.BL_ASK)
+                    for channel in [0, 1]:
+                        assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
+                        assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
+                        assert bl.BL_Range(2) == 3.5
+                        assert bl.BL_Offset(-1.75) == -1.75
+                        assert bl.BL_Enable(True) == True
+
+                    bl.BL_Rate(bl.BL_MAX_RATE)
+                    bl.BL_Size(bl.BL_MAX_SIZE)
+                    actual_time = bl.BL_Time(capture_time)
+                    actual_rate = bl.BL_Rate(bl.BL_ASK)
+                    actual_size = bl.BL_Size(bl.BL_ASK)
+                except:
+                    logging.warning('Assertion error during BitScope config. '
+                                    'Re-trying...')
+                    continue
+                break
 
             def do_measurement():
                 bl.BL_Trace()
