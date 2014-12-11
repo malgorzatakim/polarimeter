@@ -41,7 +41,7 @@ def main(capture_time, repeat=1):
                 while True:
                     try:
                         assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
-                        bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
+                        assert bl.BL_Mode(bl.BL_MODE_DUAL) == 1 # capture mode
 
                         for channel in [0, 1]:
                             assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
@@ -92,5 +92,5 @@ if __name__ == '__main__':
 
     time, chA, chB = main(args.time)
 
-    for t, chA, chB in zip(time, chA, chB):
+    for t, chA, chB in zip(time, chA[0], chB[0]):
         print '%f,%f,%f' % (t, chA, chB)
