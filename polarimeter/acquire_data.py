@@ -12,68 +12,65 @@ def main(capture_time, repeat=1):
 
     Returns:
         t: time for each sample (seconds)
-        chA: signal (volts) from channel A
-        chB: signal (volts) from channel B
+        chA: list of lists containing signal (volts) from channel A at
+        times in t.
+        chB: as above but for channel B.
 
-    chA and chB are lists of lists containing repeat measurements.
+    If there are n repeats, len(chA) and len(chB) == n.
 
     Example:
         t, chA, chB = main(10)
+
+        where:
+        t = [0.0001, 0.0002, ...]
+        chA[0] = [voltage1, voltage2, ...]
+        chB[0] = [voltage1, voltage2, ...]
     """
 
     """BitScope library changes working directory. Need to change back
     at the end of the function."""
     intial_dir = os.getcwd()
 
+    chA = []
+    chB = []
+
     if bl.BL_Open():
         try:
-            # BitScope configuration
-            while True:
-                try:
-                    assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
-                    bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
+            while len(chA) < repeat:
+                # BitScope configuration
+                while True:
+                    try:
+                        assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
+                        bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
 
-                    for channel in [0, 1]:
-                        assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
-                        assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
-                        assert bl.BL_Range(2) == 3.5
-                        assert bl.BL_Offset(-1.75) == -1.75
-                        assert bl.BL_Enable(True) == True
+                        for channel in [0, 1]:
+                            assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
+                            assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
+                            assert bl.BL_Range(2) == 3.5
+                            assert bl.BL_Offset(-1.75) == -1.75
+                            assert bl.BL_Enable(True) == True
 
-                    bl.BL_Rate(bl.BL_MAX_RATE)
-                    bl.BL_Size(bl.BL_MAX_SIZE)
-                    actual_time = bl.BL_Time(capture_time)
-                    actual_rate = bl.BL_Rate(bl.BL_ASK)
-                    actual_size = bl.BL_Size(bl.BL_ASK)
-                except:
-                    logging.warning('Assertion error during BitScope config. '
-                                    'Re-trying...')
-                    continue
-                break
+                        bl.BL_Rate(bl.BL_MAX_RATE)
+                        bl.BL_Size(bl.BL_MAX_SIZE)
+                        bl.BL_Time(capture_time)
+                        actual_rate = bl.BL_Rate(bl.BL_ASK)
+                        actual_size = bl.BL_Size(bl.BL_ASK)
+                    except:
+                        logging.warning('Assertion error during BitScope config. '
+                                        'Re-trying...')
+                        continue
+                    break
 
-            def do_measurement():
+                # Measurement and data acquisition
                 bl.BL_Trace()
 
                 channel = 0
                 assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-                chA = bl.BL_Acquire()
+                chA.append(bl.BL_Acquire())
 
                 channel = 1
                 assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-                chB = bl.BL_Acquire()
-
-                return chA, chB
-
-            if repeat == 1:
-                chA, chB = do_measurement()
-            else:
-                chA = list()
-                chB = list()
-
-                for i in range(repeat):
-                    a, b = do_measurement()
-                    chA.append(a)
-                    chB.append(b)
+                chB.append(bl.BL_Acquire())
         finally:
             bl.BL_Close()
             os.chdir(intial_dir)
