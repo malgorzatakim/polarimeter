@@ -24,57 +24,50 @@ def main(capture_time, repeat=1):
     at the end of the function."""
     intial_dir = os.getcwd()
 
-    assert bl.BL_Open() == 1 # returns number devices opened
+    if bl.BL_Open():
+        assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
+        bl.BL_Mode(bl.BL_MODE_DUAL) # capture mode
 
-    """First, must select device. Returns index of selected entity.
-    Note that it is 0-indexed."""
-    assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
+        channels = [0,1]
+        for channel in channels:
+            assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
+            assert bl.BL_Select(bl.BL_SELECT_SOURCE,bl.BL_SOURCE_POD) == 0
+            assert bl.BL_Range(2) == 3.5
+            assert bl.BL_Offset(-1.75) == -1.75
+            assert bl.BL_Enable(True) == True
+            bl.BL_Rate(bl.BL_MAX_RATE)
+            bl.BL_Size(bl.BL_MAX_SIZE)
+            actual_time = bl.BL_Time(capture_time)
+            actual_rate = bl.BL_Rate(bl.BL_ASK)
+            actual_size = bl.BL_Size(bl.BL_ASK)
 
-    """Second, select the capture mode. This must happen after
-    selecting the device but before selecting channels."""
-    bl.BL_Mode(bl.BL_MODE_DUAL) # prefered capture mode
+        def do_measurement():
+            bl.BL_Trace()
 
-    """Now select each channel in turn and configure. Returns index
-    of selected channel if channel has been successfully
-    selected."""
-    channels = [0,1]
-    for channel in channels:
-        assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-        assert bl.BL_Select(bl.BL_SELECT_SOURCE,bl.BL_SOURCE_POD) == 0
-        assert bl.BL_Range(2) == 3.5
-        assert bl.BL_Offset(-1.75) == -1.75
-        assert bl.BL_Enable(True) == True
-        bl.BL_Rate(bl.BL_MAX_RATE)
-        bl.BL_Size(bl.BL_MAX_SIZE)
-        actual_time = bl.BL_Time(capture_time)
-        actual_rate = bl.BL_Rate(bl.BL_ASK)
-        actual_size = bl.BL_Size(bl.BL_ASK)
+            channel = 0
+            assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
+            chA = bl.BL_Acquire()
 
-    def do_measurement():
-        bl.BL_Trace()
+            channel = 1
+            assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
+            chB = bl.BL_Acquire()
 
-        channel = 0
-        assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-        chA = bl.BL_Acquire()
+            return chA, chB
 
-        channel = 1
-        assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-        chB = bl.BL_Acquire()
+        if repeat == 1:
+            chA, chB = do_measurement()
+        else:
+            chA = list()
+            chB = list()
 
-        return chA, chB
+            for i in range(repeat):
+                a, b = do_measurement()
+                chA.append(a)
+                chB.append(b)
 
-    if repeat == 1:
-        chA, chB = do_measurement()
+        bl.BL_Close()
     else:
-        chA = list()
-        chB = list()
-
-        for i in range(repeat):
-            a, b = do_measurement()
-            chA.append(a)
-            chB.append(b)
-
-    bl.BL_Close()
+        raise Exception('Unable to open connection to BitScope')
 
     time = [t / actual_rate for t in range(0, actual_size)]
     
