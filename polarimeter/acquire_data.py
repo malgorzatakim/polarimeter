@@ -44,7 +44,7 @@ def main(rate, size, repeat=1):
                         assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
                         assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
                         assert bl.BL_Range(2) == 3.5
-                        assert bl.BL_Offset(-1.75) == -1.75
+                        assert bl.BL_Offset(-1.65) == -1.65
                         assert bl.BL_Enable(True) == True
 
                     actual_rate = bl.BL_Rate(rate)
