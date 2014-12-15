@@ -4,7 +4,7 @@ import argparse
 import logging
 import os
 
-def main(rate, size, repeat=1):
+def main(rate=5000, size=5000, repeat=1):
     """Acquire data from channels A and B for with specified sample
     rate, capture size and number of repeat measurements.
 
