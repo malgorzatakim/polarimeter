@@ -4,11 +4,9 @@ import argparse
 import logging
 import os
 
-def main(capture_time, repeat=1):
-    """Acquire data from channels A and B for capture_time (seconds)
-    with the specified number of repeat measurements. Automatically uses
-    the highest sample rate possible. Note that the actual capture time
-    may be slightly different to that requested (check t[-1]).
+def main(rate, size, repeat=1):
+    """Acquire data from channels A and B for with specified sample
+    rate, capture size and number of repeat measurements.
 
     Returns:
         t: time for each sample (seconds)
@@ -19,7 +17,7 @@ def main(capture_time, repeat=1):
     If there are n repeats, len(chA) and len(chB) == n.
 
     Example:
-        t, chA, chB = main(10)
+        t, chA, chB = main(5000, 6000,3)
 
         where:
         t = [0.0001, 0.0002, ...]
@@ -36,41 +34,50 @@ def main(capture_time, repeat=1):
 
     if bl.BL_Open():
         try:
+            # BitScope configuration
+            while True:
+                try:
+                    assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
+                    assert bl.BL_Mode(bl.BL_MODE_DUAL) == 1 # capture mode
+
+                    for channel in [0, 1]:
+                        assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
+                        assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
+                        assert bl.BL_Range(2) == 3.5
+                        assert bl.BL_Offset(-1.75) == -1.75
+                        assert bl.BL_Enable(True) == True
+
+                    actual_rate = bl.BL_Rate(rate)
+                    if actual_rate != rate:
+                        logging.warning('Actual sampling rate (%.2f Hz) different'
+                                        ' to requested sampling rate (%.2f Hz).'
+                                        % (actual_rate, rate))
+
+                    actual_size = bl.BL_Size(size)
+                    if actual_size != size:
+                        logging.warning('Actual capture size (%i samples) '
+                                        'different to requested capture size '
+                                        '(%i samples).' % (actual_size, size))
+                except:
+                    logging.warning('Assertion error during BitScope config. '
+                                    'Re-trying...')
+                    continue
+                break
+
+            # Measurement and data acquisition
             while len(chA) < repeat:
-                # BitScope configuration
-                while True:
-                    try:
-                        assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
-                        assert bl.BL_Mode(bl.BL_MODE_DUAL) == 1 # capture mode
+                trace = bl.BL_Trace(actual_rate*actual_size*10)
+                state = bl.BL_State()
+                if trace and (state == 2):
+                    channel = 0
+                    assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
+                    chA.append(bl.BL_Acquire())
 
-                        for channel in [0, 1]:
-                            assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
-                            assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
-                            assert bl.BL_Range(2) == 3.5
-                            assert bl.BL_Offset(-1.75) == -1.75
-                            assert bl.BL_Enable(True) == True
-
-                        bl.BL_Rate(bl.BL_MAX_RATE)
-                        bl.BL_Size(bl.BL_MAX_SIZE)
-                        bl.BL_Time(capture_time)
-                        actual_rate = bl.BL_Rate(bl.BL_ASK)
-                        actual_size = bl.BL_Size(bl.BL_ASK)
-                    except:
-                        logging.warning('Assertion error during BitScope config. '
-                                        'Re-trying...')
-                        continue
-                    break
-
-                # Measurement and data acquisition
-                bl.BL_Trace()
-
-                channel = 0
-                assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-                chA.append(bl.BL_Acquire())
-
-                channel = 1
-                assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
-                chB.append(bl.BL_Acquire())
+                    channel = 1
+                    assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
+                    chB.append(bl.BL_Acquire())
+                else:
+                    raise Exception('Trace error.\rTrace status %s with state %s' % (trace, state))
         finally:
             bl.BL_Close()
             os.chdir(intial_dir)
