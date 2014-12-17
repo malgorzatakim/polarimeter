@@ -32,9 +32,11 @@ def acquire(rate=5000, size=5000, repeat=1):
     chB = []
 
     if bl.BL_Open():
+        logging.info('BitScope connection opened')
         try:
             # BitScope configuration
             while True:
+                logging.info('Beginning configuration')
                 try:
                     assert bl.BL_Select(bl.BL_SELECT_DEVICE,0) == 0
                     assert bl.BL_Mode(bl.BL_MODE_DUAL) == 1 # capture mode
@@ -61,13 +63,16 @@ def acquire(rate=5000, size=5000, repeat=1):
                     logging.warning('Assertion error during BitScope config. '
                                     'Re-trying...')
                     continue
+                logging.info('Configuration complete')
                 break
 
             # Measurement and data acquisition
             while len(chA) < repeat:
+                logging.info('Starting trace %i of %i' % (len(chA)+1, repeat))
                 trace = bl.BL_Trace(actual_rate*actual_size*10)
                 state = bl.BL_State()
                 if trace and (state == 2):
+                    logging.info('Trace %i of %i complete' % (len(chA)+1, repeat))
                     channel = 0
                     assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
                     chA.append(bl.BL_Acquire())
@@ -75,10 +80,13 @@ def acquire(rate=5000, size=5000, repeat=1):
                     channel = 1
                     assert bl.BL_Select(bl.BL_SELECT_CHANNEL,channel) == channel
                     chB.append(bl.BL_Acquire())
+
+                    logging.info('Data acquired')
                 else:
                     raise Exception('Trace error.\rTrace status %s with state %s' % (trace, state))
         finally:
             bl.BL_Close()
+            logging.info('BitScope connection closed')
             os.chdir(intial_dir)
     else:
         raise Exception('Unable to open connection to BitScope')
