@@ -1,6 +1,21 @@
 from __future__ import division
 import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
+import bitscope
+
+def measure(filename=None):
+    """
+    Acquire signal with 30 repeats. Calculate phase difference and
+    write to filename, if provided. Return mean phase difference. All
+    in radians.
+    """
+    t, a, b = bitscope.acquire(repeat=30)
+    delta_phi = calc_phase_difference(t, a, b)
+
+    if filename is not None:
+        np.savetxt(filename, delta_phi, delimiter=',')
+
+    return np.mean(delta_phi)
 
 def calc_phase_difference(time, obj, ref):
     """Calculate the phase difference between the reference and object
