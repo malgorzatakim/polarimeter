@@ -3,13 +3,13 @@ import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
 import bitscope
 
-def measure(filename=None):
+def measure(filename=None, repeat=30):
     """
-    Acquire signal with 30 repeats. Calculate phase difference and
-    write to filename, if provided. Return mean phase difference. All
+    Acquire signal with default of 30 repeats. Calculate phase difference
+    and write to filename, if provided. Return mean phase difference. All
     in radians.
     """
-    t, a, b = bitscope.acquire(repeat=30)
+    t, a, b = bitscope.acquire(repeat=repeat)
     delta_phi = calc_phase_difference(t, a, b)
 
     if filename is not None:
