@@ -6,8 +6,8 @@ import bitscope
 def measure(filename=None, repeat=30):
     """
     Acquire signal with default of 30 repeats. Calculate phase difference
-    and write to filename, if provided. Return mean phase difference. All
-    in radians.
+    and write to filename, if provided. Return list of phase differences.
+    All in radians.
     """
     t, a, b = bitscope.acquire(repeat=repeat)
     delta_phi = calc_phase_difference(t, a, b)
@@ -15,7 +15,7 @@ def measure(filename=None, repeat=30):
     if filename is not None:
         np.savetxt(filename, delta_phi, delimiter=',')
 
-    return np.mean(delta_phi)
+    return delta_phi
 
 def calc_phase_difference(time, obj, ref):
     """Calculate the phase difference between the reference and object
