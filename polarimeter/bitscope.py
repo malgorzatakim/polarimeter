@@ -44,8 +44,8 @@ def acquire(rate=5000, size=5000, repeat=1):
                     for channel in [0, 1]:
                         assert bl.BL_Select(bl.BL_SELECT_CHANNEL, channel) == channel
                         assert bl.BL_Select(bl.BL_SELECT_SOURCE, bl.BL_SOURCE_POD) == 0
-                        assert bl.BL_Range(2) == 3.5
-                        assert bl.BL_Offset(-1.65) == -1.65
+                        assert bl.BL_Range(3) == 5.2
+                        assert bl.BL_Offset(-1.98) == -1.98
                         assert bl.BL_Enable(True) == True
 
                     actual_rate = bl.BL_Rate(rate)
