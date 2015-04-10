@@ -19,6 +19,9 @@ def acquire(capture_time, IP='155.198.231.92', port=5020):
 	"""Aquires data for capture_time (seconds) via acquisition PC.
 	Returns time, and signals of hannel A and channel B.
 	"""
+	if capture_time <= 0:
+		raise ValueError('capture_time must be greater than zero.')
+
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((IP, port))
 	sock.send('%.2f\r' % capture_time)
