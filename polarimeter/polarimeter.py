@@ -34,23 +34,23 @@ def calc_phase_difference(time, obj, ref):
         numpy array of size (n, 1) with each phase difference
     """
 
-    time = np.array(time)
-    obj = np.array(obj)
-    ref = np.array(ref)
+    # time = np.array(time)
+    # obj = np.array(obj)
+    # ref = np.array(ref)
 
-    f = fftfreq(ref.shape[1], time[1]-time[0])
+    f = fftfreq(len(ref), time[1]-time[0])
 
     # low pass filter
-    lp_filter = np.ones(obj.shape) / (1 + ((f / 6)**2))
+    lp_filter = np.ones(len(obj)) / (1 + ((f / 6)**2))
     ref = ifft(fft(ref) * lp_filter)
     obj = ifft(fft(obj) * lp_filter)
 
     # apodising filter (time domain)
     a0 = 0.355768
     a1 = 0.487396
-    a2 = 0.144232
+    a2 = 0.144232  
     a3 = 0.012604
-    n = np.tile(np.arange(0,len(time),1), (ref.shape[0], 1))
+    n = np.arange(0,len(time),1)
     apodize_filter =  (a0 - a1*np.cos(2*np.pi*n/len(time))
                       + a2*np.cos(4*np.pi*n/len(time))
                       - a3*np.cos(6*np.pi*n/len(time)))
@@ -60,11 +60,10 @@ def calc_phase_difference(time, obj, ref):
     # bp filter in freq domain
     sig = 1
     f0 = 7
-    bp_filter = np.tile(np.exp(-(f-f0)**2 / (2*sig*sig)), (ref.shape[0], 1))
+    bp_filter = np.exp(-(f-f0)**2 / (2*sig*sig))
     ref = ifft(fft(ref) * bp_filter)
     obj = ifft(fft(obj) * bp_filter)
 
     delta_phi = np.angle(obj * ref.conjugate()) / 2
     # exclude outer 25% because of edge effects
-    return np.mean(delta_phi[:,delta_phi.shape[1]*0.25:delta_phi.shape[1]*0.75],
-                   axis=1)
+    return np.mean(delta_phi[len(delta_phi)*0.25:len(delta_phi)*0.75])
