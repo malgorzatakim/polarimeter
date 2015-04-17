@@ -1,6 +1,8 @@
 from __future__ import division
 import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
+import time
+import labview
 
 def calc_phase_difference(time, obj, ref):
     """Calculate the phase difference between the reference and object
@@ -66,3 +68,25 @@ def band_pass_filter(time, signal, freq=3.4, sigma=0.5):
     f = fftfreq(len(time), time[1]-time[0])
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(fft(signal) * bp_filter)
+
+def measure(capture_time=5):
+    """Acquire data (capture time in seconds) then calculate the phase
+    difference.
+
+    Returns Unix timestamp (when the capture started) and phase
+    difference in degrees.
+    """
+    timestamp = time.time()
+    t, a, b = labview.acquire(capture_time)
+    phase_difference = np.mean(calc_phase_difference(t, a, b))
+    return timestamp, phase_difference
+
+def write_result(filename, timestamp, phase_difference):
+    """Append the timestamp and phase_difference to filename."""
+    f = open(filename, 'a')
+    f.write('{}, {}\n'.format(timestamp, phase_difference))
+    f.close()
+
+def pretty_print_result(timestamp, phase_difference):
+    print('{:s}, {:07.3f} degrees'.format(time.asctime(time.gmtime(timestamp)),
+                                          phase_difference))
