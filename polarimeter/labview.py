@@ -30,5 +30,5 @@ def acquire(capture_time, IP='155.198.231.92', port=5020):
 	filename = sock.recv(1024)
 	assert filename[-3:] == 'csv'
 	sock.close()
-	data = np.loadtxt('data/' + filename, delimiter=',')
+	data = np.loadtxt('data/signals/' + filename, delimiter=',')
 	return (data[:,0], data[:,1], data[:,2])
