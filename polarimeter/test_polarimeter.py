@@ -53,6 +53,12 @@ class Test(unittest.TestCase):
         self.assertIsInstance(phase_difference, float)
         self.assertTrue(end_time - start_time > capture_time)
 
+    def test_write_result(self):
+        timestamp, phase_difference = p.measure(1)
+        string_written = p.write_result('test_output.txt', timestamp,
+                                        phase_difference)
+        self.assertIsInstance(string_written, str)
+
 def simulate_signals(t, phiA=0, phiB=0.5, dcA=0.1, dcB=0.2,
                       ampA=1, ampB=1.3, noise=0):
     """Simulate signals.

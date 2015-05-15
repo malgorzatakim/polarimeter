@@ -82,8 +82,10 @@ def measure(capture_time=5):
 def write_result(filename, timestamp, phase_difference):
     """Append the timestamp and phase_difference to filename."""
     f = open(filename, 'a')
-    f.write('{}, {}\n'.format(timestamp, phase_difference))
+    string = '{}, {}\n'.format(timestamp, phase_difference)
+    f.write(string)
     f.close()
+    return string
 
 
 def pretty_print_result(timestamp, phase_difference):
