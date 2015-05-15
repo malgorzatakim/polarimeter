@@ -47,17 +47,9 @@ def low_pass_filter(time, signal):
 def apodise(time, signal):
     """Apodise the signal. Expects and returns np.arrays.
     """
-    a0 = 0.355768
-    a1 = 0.487396
-    a2 = 0.144232
-    a3 = 0.012604
-    n = np.arange(0,len(time))
-    apodize_filter =  (a0 - a1*np.cos(2*np.pi*n/len(time))
-                      + a2*np.cos(4*np.pi*n/len(time))
-                      - a3*np.cos(6*np.pi*n/len(time)))
-    return signal * apodize_filter
+    return signal * np.blackman(len(time))
 
-def band_pass_filter(time, signal, freq=3.4, sigma=0.5):
+def band_pass_filter(time, signal, freq=3.4, sigma=0.8):
     """Apply band pass filter to signal.
 
     Optionally specify the center frequency (freq, default 3.4)
@@ -90,3 +82,4 @@ def write_result(filename, timestamp, phase_difference):
 def pretty_print_result(timestamp, phase_difference):
     print('{:s}, {:07.3f} degrees'.format(time.asctime(time.gmtime(timestamp)),
                                           phase_difference))
+
