@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
     def test_measure(self):
         """Test p.measure()"""
         start_time = time.time()
-        capture_time = 30
+        capture_time = 5
         timestamp, phase_difference = p.measure(capture_time)
         end_time = time.time()
 
