@@ -4,10 +4,11 @@ from scipy.fftpack import ifft, fft, fftfreq
 import time
 import labview
 
+
 def calc_phase_difference(time, obj, ref):
     """Calculate the phase difference between the reference and object
     signals. Returns phase differences in degrees.
-    
+
     Arguments:
         time: sampling times
         obj: object beam signal
@@ -35,19 +36,22 @@ def calc_phase_difference(time, obj, ref):
     delta_phi = np.rad2deg(delta_phi)
     return delta_phi
 
+
 def low_pass_filter(time, signal):
     """Apply a low pass filter to the signal (np.array).
 
     Returns np.array containing the low-pass filtered signal.
-    """ 
+    """
     f = fftfreq(len(time), time[1]-time[0])
     lp_filter = np.ones(len(signal)) / (1 + ((f / 6)**2))
     return ifft(fft(signal) * lp_filter)
+
 
 def apodise(time, signal):
     """Apodise the signal. Expects and returns np.arrays.
     """
     return signal * np.blackman(len(time))
+
 
 def band_pass_filter(time, signal, freq=3.4, sigma=0.8):
     """Apply band pass filter to signal.
@@ -61,6 +65,7 @@ def band_pass_filter(time, signal, freq=3.4, sigma=0.8):
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(fft(signal) * bp_filter)
 
+
 def measure(capture_time=5):
     """Acquire data (capture time in seconds) then calculate the phase
     difference.
@@ -73,13 +78,14 @@ def measure(capture_time=5):
     phase_difference = np.mean(calc_phase_difference(t, a, b))
     return timestamp, phase_difference
 
+
 def write_result(filename, timestamp, phase_difference):
     """Append the timestamp and phase_difference to filename."""
     f = open(filename, 'a')
     f.write('{}, {}\n'.format(timestamp, phase_difference))
     f.close()
 
+
 def pretty_print_result(timestamp, phase_difference):
     print('{:s}, {:07.3f} degrees'.format(time.asctime(time.gmtime(timestamp)),
                                           phase_difference))
-
