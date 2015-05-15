@@ -3,6 +3,7 @@ import unittest
 import polarimeter as p
 import numpy as np
 import time
+import os
 
 class Test(unittest.TestCase):
     """Tests for polarimeter.py"""
@@ -49,15 +50,21 @@ class Test(unittest.TestCase):
         timestamp, phase_difference = p.measure(capture_time)
         end_time = time.time()
 
-        self.assertIsInstance(timestamp, float)
+        self.assertIsInstance(timestamp, int)
         self.assertIsInstance(phase_difference, float)
         self.assertTrue(end_time - start_time > capture_time)
 
     def test_write_result(self):
         timestamp, phase_difference = p.measure(1)
-        string_written = p.write_result('test_output.txt', timestamp,
+        string_written = p.write_result('temp.txt', timestamp,
                                         phase_difference)
         self.assertIsInstance(string_written, str)
+
+	contents = np.loadtxt('temp.txt', delimiter=',', dtype={'names': ('time', 'phi'), 'formats': (np.int32, np.float64)})
+        os.remove('temp.txt')
+	self.assertEqual(contents['time'], timestamp)
+	self.assertAlmostEqual(contents['phi'], phase_difference)
+
 
 def simulate_signals(t, phiA=0, phiB=0.5, dcA=0.1, dcB=0.2,
                       ampA=1, ampB=1.3, noise=0):
