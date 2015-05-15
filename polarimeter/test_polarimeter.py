@@ -1,7 +1,8 @@
 from __future__ import division
 import unittest
-import polarimeter
+import polarimeter as p
 import numpy as np
+import time
 
 class Test(unittest.TestCase):
     """Tests for polarimeter.py"""
@@ -23,7 +24,7 @@ class Test(unittest.TestCase):
         phiB = np.pi * 0.33
         time = np.arange(0, 3, 0.001)
         sigA, sigB = simulate_signals(time, phiB=phiB)
-        phi = polarimeter.calc_phase_difference(time, sigA, sigB)
+        phi = p.calc_phase_difference(time, sigA, sigB)
 
         self.assertIs(type(phi), np.ndarray)
         self.assertEqual(round(np.mean(np.deg2rad(phi)), 3),
@@ -34,12 +35,23 @@ class Test(unittest.TestCase):
         phiB = np.pi * 0.33
         time = np.arange(0, 3, 0.001)
         sigA, sigB = simulate_signals(time, phiB=phiB, noise=0.01)
-        phi = polarimeter.calc_phase_difference(time, sigA, sigB)
+        phi = p.calc_phase_difference(time, sigA, sigB)
 
         self.assertIs(type(phi), np.ndarray)
         self.assertTrue(len(phi) > 1)
         self.assertEqual(round(np.mean(np.deg2rad(phi)), 2),
                          round(phiB, 2))
+
+    def test_measure(self):
+        """Test p.measure()"""
+        start_time = time.time()
+        capture_time = 30
+        timestamp, phase_difference = p.measure(capture_time)
+        end_time = time.time()
+
+        self.assertIsInstance(timestamp, float)
+        self.assertIsInstance(phase_difference, float)
+        self.assertTrue(end_time - start_time > capture_time)
 
 def simulate_signals(t, phiA=0, phiB=0.5, dcA=0.1, dcB=0.2,
                       ampA=1, ampB=1.3, noise=0):
