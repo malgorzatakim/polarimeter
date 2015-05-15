@@ -70,10 +70,10 @@ def measure(capture_time=5):
     """Acquire data (capture time in seconds) then calculate the phase
     difference.
 
-    Returns Unix timestamp (when the capture started) and phase
-    difference in degrees.
+    Returns Unix timestamp (when the capture started, int) and
+    phase difference in degrees.
     """
-    timestamp = time.time()
+    timestamp = int(time.time())
     t, a, b = labview.acquire(capture_time)
     phase_difference = np.mean(calc_phase_difference(t, a, b))
     return timestamp, phase_difference
@@ -82,7 +82,7 @@ def measure(capture_time=5):
 def write_result(filename, timestamp, phase_difference):
     """Append the timestamp and phase_difference to filename."""
     f = open(filename, 'a')
-    string = '{}, {}\n'.format(timestamp, phase_difference)
+    string = '{}, {:.15f}\n'.format(timestamp, phase_difference)
     f.write(string)
     f.close()
     return string
