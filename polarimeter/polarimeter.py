@@ -7,19 +7,12 @@ import labview
 
 def calc_phase_difference(time, obj, ref):
     """Calculate the phase difference between the reference and object
-    signals. Returns phase differences in degrees.
+    signals. Returns phase difference in degrees.
 
-    Arguments:
+    Arguments (1D arrays or lists):
         time: sampling times
         obj: object beam signal
         ref: reference beam signal
-
-    Obj and ref can be list of lists of voltages at each sample or a
-    numpy array of size (n, m) where n is the number of repeats and m is
-    the number of samples.
-
-    Returns:
-        numpy array of size (n, 1) with each phase difference
     """
 
     obj = low_pass_filter(time, obj)
@@ -31,9 +24,9 @@ def calc_phase_difference(time, obj, ref):
     obj = band_pass_filter(time, obj)
     ref = band_pass_filter(time, ref)
 
-    delta_phi = np.angle(obj * ref.conjugate()) / 2
+    delta_phi = np.angle(obj * ref.conjugate(), deg=True) / 2
     delta_phi = delta_phi[len(delta_phi)*0.2:len(delta_phi)*0.8]
-    delta_phi = np.rad2deg(delta_phi)
+    delta_phi = np.mean(delta_phi)
     return delta_phi
 
 
@@ -65,7 +58,6 @@ def band_pass_filter(time, signal, freq=3.4, sigma=0.8):
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(fft(signal) * bp_filter)
 
-
 def measure(capture_time=5):
     """Acquire data (capture time in seconds) then calculate the phase
     difference.
@@ -75,7 +67,7 @@ def measure(capture_time=5):
     """
     timestamp = int(time.time())
     t, a, b = labview.acquire(capture_time)
-    phase_difference = np.mean(calc_phase_difference(t, a, b))
+    phase_difference = calc_phase_difference(t, a, b)
     return timestamp, phase_difference
 
 
