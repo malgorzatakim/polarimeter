@@ -12,6 +12,7 @@ and signals of the two channels.
 import socket
 import time
 import numpy as np
+import os
 
 socket.setdefaulttimeout(60) # seconds
 
@@ -30,5 +31,8 @@ def acquire(capture_time, IP='155.198.231.92', port=5020):
 	filename = sock.recv(1024)
 	assert filename[-3:] == 'csv'
 	sock.close()
-	return np.loadtxt('data/signals/' + filename, delimiter=',',
+	signal_file = 'data/signals/' + filename
+	data = np.loadtxt(signal_file, delimiter=',',
                           dtype=np.dtype('d'), unpack=True)
+	os.remove(signal_file)
+	return data
