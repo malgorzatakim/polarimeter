@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 		self.assertIs(type(t), np.ndarray)
 		self.assertIs(type(a), np.ndarray)
 		self.assertIs(type(b), np.ndarray)
-		self.assertAlmostEqual(t[-1], capture_time, places=3)
+		self.assertAlmostEqual(t[-1], capture_time, places=2)
 
 if __name__ == '__main__':
 	unittest.main()
