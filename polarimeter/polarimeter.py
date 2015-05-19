@@ -64,7 +64,7 @@ def band_pass_filter(time, signal, sigma=0.8, freq=None):
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(sigfft * bp_filter)
 
-def measure(capture_time=5):
+def measure(capture_time=5, save_data=False):
     """Acquire data (capture time in seconds) then calculate the phase
     difference.
 
@@ -72,7 +72,7 @@ def measure(capture_time=5):
     phase difference in degrees.
     """
     timestamp = int(time.time())
-    t, a, b = labview.acquire(capture_time)
+    t, a, b = labview.acquire(capture_time, save_data=save_data)
     phase_difference = calc_phase_difference(t, a, b)
     return timestamp, phase_difference
 

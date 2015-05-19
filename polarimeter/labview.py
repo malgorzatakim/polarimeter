@@ -16,7 +16,7 @@ import os
 
 socket.setdefaulttimeout(60) # seconds
 
-def acquire(capture_time, IP='155.198.231.92', port=5020):
+def acquire(capture_time, IP='155.198.231.92', port=5020, save_data=False):
 	"""Aquires data for capture_time (seconds) via acquisition PC.
 	Returns time, and signals of hannel A and channel B.
 	"""
@@ -34,5 +34,6 @@ def acquire(capture_time, IP='155.198.231.92', port=5020):
 	signal_file = 'data/signals/' + filename
 	data = np.loadtxt(signal_file, delimiter=',',
                           dtype=np.dtype('d'), unpack=True)
-	os.remove(signal_file)
+        if save_data is False:
+            os.remove(signal_file)
 	return data
