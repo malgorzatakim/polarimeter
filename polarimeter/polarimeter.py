@@ -14,10 +14,6 @@ def calc_phase_difference(time, obj, ref):
         obj: object beam signal
         ref: reference beam signal
     """
-
-    obj = low_pass_filter(time, obj)
-    ref = low_pass_filter(time, ref)
-
     obj = apodise(time, obj)
     ref = apodise(time, ref)
 
