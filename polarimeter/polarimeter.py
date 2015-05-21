@@ -30,13 +30,15 @@ def calc_phase_difference(time, obj, ref):
     return delta_phi
 
 
-def low_pass_filter(time, signal):
+def low_pass_filter(time, signal, fwhm=100):
     """Apply a low pass filter to the signal (np.array).
 
     Returns np.array containing the low-pass filtered signal.
     """
     f = fftfreq(len(time), time[1]-time[0])
-    lp_filter = np.ones(len(signal)) / (1 + ((f / 6)**2))
+    sigma = fwhm / (2 * np.sqrt(2 * np.log(2)))
+    freq = 0
+    lp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(fft(signal) * lp_filter)
 
 
