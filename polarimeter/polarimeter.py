@@ -49,7 +49,7 @@ def apodise(time, signal):
 
 
 def band_pass_filter(time, signal, sigma=0.43, freq=3.4):
-    """Apply band pass filter to signal.
+    """Apply band pass filter to signal (positve frequencies only).
 
     Sigma is the width of the filter. Freq is the position.
 
