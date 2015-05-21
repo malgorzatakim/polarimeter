@@ -46,23 +46,17 @@ def apodise(time, signal):
     return signal * np.blackman(len(time))
 
 
-def band_pass_filter(time, signal, sigma=0.8, freq=None):
+def band_pass_filter(time, signal, sigma=0.43, freq=3.4):
     """Apply band pass filter to signal.
 
-    Sigma is the width of the filter. Center frequency automatically
-    found by the max in the FFT, but you can override this by specifying
-    freq (Hz).
+    Sigma is the width of the filter. Freq is the position.
 
     Expects and returns 1-D np.arrays.
     """
     f = fftfreq(len(time), time[1]-time[0])
-    sigfft = fft(signal)
-
-    if freq is None:
-        freq = f[f>1][np.argmax(sigfft[f>1])]
-        
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
-    return ifft(sigfft * bp_filter)
+    bp_filter[f <= 0] = 0
+    return ifft(fft(signal) * bp_filter)
 
 def measure(capture_time=5, save_data=False):
     """Acquire data (capture time in seconds) then calculate the phase
