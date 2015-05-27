@@ -89,3 +89,39 @@ def pretty_print_result(timestamp, phase_difference, laser):
     line = '{:s}, {:07.3f} degrees, laser intensity: {:.3f} V'
     print(line.format(time.asctime(time.gmtime(timestamp)),
                       phase_difference, laser))
+
+
+def run(output_file, duration, units='m', print_output=True):
+    """Repeatedly run measurements for specified duration.
+    Save data for output_file. Returns mean and std of phase differences, and
+    number of measurements.
+
+    e.g. run(lambda: print('hello world'), duration=3, units='s')
+    """
+
+    # Convert time into seconds
+    if units == 's': # seconds
+        pass
+    elif units == 'm': # minutes
+        duration *= 60
+    elif units == 'h': # hours
+        duration *= 60 * 60
+    elif units == 'd': # days
+        duration *= 24 * 60 * 60
+    else:
+        raise ValueError(('Unit must be seconds (s), minutes (m), hours (h)'
+                          ' or days (d).'))
+
+    start = time.time()
+
+    # repeatedly acquire data
+    while time.time() < start + duration:
+        t, phi, laser_intensity = measure(capture_time=5, save_data=False)
+        write_result(output_file, t, phi, laser_intensity)
+
+        if print_output:
+            pretty_print_result(t, phi, laser_intensity)
+    
+    # load all the data to compute stats
+    t, phi, laser = np.loadtxt(output_file, delimiter=',', unpack=True)
+    return np.mean(phi), np.std(phi, ddof=1), len(phi)
