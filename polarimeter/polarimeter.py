@@ -57,27 +57,35 @@ def band_pass_filter(time, signal, sigma=0.43, freq=3.4):
     return ifft(fft(signal) * bp_filter)
 
 def measure(capture_time=5, save_data=False):
-    """Acquire data (capture time in seconds) then calculate the phase
+    """Acquire data (with capture time in seconds) and calculate the phase
     difference.
 
-    Returns Unix timestamp (when the capture started, int) and
-    phase difference in degrees.
+    Returns:
+        Unix timestamp when the capture started
+        Phase difference (degrees)
+        Mean laser intensity over the capture time.
+
+    If save_data is true, the signal is recorded and kept in
+    ~/dcb/polarimeter/data/signals.
     """
     timestamp = int(time.time())
-    t, a, b = labview.acquire(capture_time, save_data=save_data)
+    t, a, b, laser = labview.acquire(capture_time, save_data=save_data)
     phase_difference = calc_phase_difference(t, a, b)
-    return timestamp, phase_difference
+    return timestamp, phase_difference, np.mean(laser)
 
 
-def write_result(filename, timestamp, phase_difference):
-    """Append the timestamp and phase_difference to filename."""
+def write_result(filename, timestamp, phase_difference, laser):
+    """Append to filename the timestamp, phase difference, and laser
+    intensity. Returns line that was written as a string.
+    """
     f = open(filename, 'a')
-    string = '{}, {:.15f}\n'.format(timestamp, phase_difference)
+    string = '{}, {:.15f}, {:.15f}\n'.format(timestamp, phase_difference, laser)
     f.write(string)
     f.close()
     return string
 
 
-def pretty_print_result(timestamp, phase_difference):
-    print('{:s}, {:07.3f} degrees'.format(time.asctime(time.gmtime(timestamp)),
-                                          phase_difference))
+def pretty_print_result(timestamp, phase_difference, laser):
+    line = '{:s}, {:07.3f} degrees, laser intensity: {:.3f} V'
+    print(line.format(time.asctime(time.gmtime(timestamp)),
+                      phase_difference, laser))

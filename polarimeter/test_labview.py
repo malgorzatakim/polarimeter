@@ -6,14 +6,14 @@ import numpy as np
 class Test(unittest.TestCase):
 	"""Tests for labview.py"""
 
-	def test_simulate_signals(self, repeat=1):
+	def test_acquire(self):
 		"""Test that labview.acquire returns data as expected."""
 		capture_time = 1
-		t, a, b = labview.acquire(capture_time)
-		print type(t)
-		self.assertIs(type(t), np.ndarray)
-		self.assertIs(type(a), np.ndarray)
-		self.assertIs(type(b), np.ndarray)
+		t, a, b, laser = labview.acquire(capture_time)
+
+		for ch in [t, a, b, laser]:
+			self.assertIsInstance(ch, np.ndarray)
+
 		self.assertAlmostEqual(t[-1], capture_time, places=2)
 
 if __name__ == '__main__':
