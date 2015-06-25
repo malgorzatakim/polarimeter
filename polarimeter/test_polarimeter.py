@@ -38,23 +38,22 @@ class Test(unittest.TestCase):
         """Test p.measure()"""
         start_time = time.time()
         capture_time = 1
-        timestamp, phase_difference, laser = p.measure(capture_time)
+        timestamp, phase_difference = p.measure(capture_time)
         end_time = time.time()
 
         self.assertIsInstance(timestamp, int)
         self.assertIsInstance(phase_difference, float)
         self.assertTrue(end_time - start_time > capture_time)
-        self.assertIsInstance(laser, float)
 
     def test_write_result(self):
-        timestamp, phase_difference, laser = p.measure(1)
+        timestamp, phase_difference = p.measure(1)
         string_written = p.write_result('temp.txt', timestamp,
-                                        phase_difference, laser)
+                                        phase_difference)
         self.assertIsInstance(string_written, str)
 
         contents = np.loadtxt('temp.txt', delimiter=',',
-                              dtype={'names': ('time', 'phi', 'laser'),
-                              'formats': (np.int32, np.float64, np.float64)})
+                              dtype={'names': ('time', 'phi'),
+                              'formats': (np.int32, np.float64)})
         os.remove('temp.txt')
         self.assertEqual(contents['time'], timestamp)
         self.assertAlmostEqual(contents['phi'], phase_difference)
@@ -63,7 +62,7 @@ def simulate_signals(time, phase_difference):
     """
     phase_difference in degrees
     """
-    f = 1.7
+    f = 10
     A = 1
     # Random initial phase for chA
     phiA = random() * 2 * np.pi

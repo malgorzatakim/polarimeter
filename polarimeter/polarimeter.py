@@ -63,32 +63,31 @@ def measure(capture_time=1, save_data=False):
     Returns:
         Unix timestamp when the capture started
         Phase difference (degrees)
-        Mean laser intensity over the capture time.
 
     If save_data is true, the signal is recorded and kept in
     ~/dcb/polarimeter/data/signals.
     """
     timestamp = int(time.time())
-    t, a, b, laser = labview.acquire(capture_time, save_data=save_data)
+    t, a, b  = labview.acquire(capture_time, save_data=save_data)
     phase_difference = calc_phase_difference(t, a, b)
-    return timestamp, phase_difference, np.mean(laser)
+    return timestamp, phase_difference
 
 
-def write_result(filename, timestamp, phase_difference, laser):
-    """Append to filename the timestamp, phase difference, and laser
-    intensity. Returns line that was written as a string.
+def write_result(filename, timestamp, phase_difference):
+    """Append to filename the timestamp and phase difference.
+    Returns line that was written as a string.
     """
     f = open(filename, 'a')
-    string = '{}, {:.15f}, {:.15f}\n'.format(timestamp, phase_difference, laser)
+    string = '{}, {:.15f}\n'.format(timestamp, phase_difference)
     f.write(string)
     f.close()
     return string
 
 
-def pretty_print_result(timestamp, phase_difference, laser):
-    line = '{:s}, {:07.3f} degrees, laser intensity: {:.3f} V'
+def pretty_print_result(timestamp, phase_difference):
+    line = '{:s}, {:07.3f} degrees'
     print(line.format(time.asctime(time.gmtime(timestamp)),
-                      phase_difference, laser))
+                      phase_difference))
 
 
 def run(output_file, duration, units='m', print_output=True):
@@ -116,12 +115,12 @@ def run(output_file, duration, units='m', print_output=True):
 
     # repeatedly acquire data
     while time.time() < start + duration:
-        t, phi, laser_intensity = measure(save_data=False)
-        write_result(output_file, t, phi, laser_intensity)
+        t, phi = measure(save_data=False)
+        write_result(output_file, t, phi)
 
         if print_output:
-            pretty_print_result(t, phi, laser_intensity)
+            pretty_print_result(t, phi)
     
     # load all the data to compute stats
-    t, phi, laser = np.loadtxt(output_file, delimiter=',', unpack=True)
+    t, phi  = np.loadtxt(output_file, delimiter=',', unpack=True)
     return np.mean(phi), np.std(phi, ddof=1), len(phi)
