@@ -44,7 +44,7 @@ def apodise(time, signal):
     return signal * np.blackman(len(time))
 
 
-def band_pass_filter(time, signal, sigma=0.43, freq=3.4):
+def band_pass_filter(time, signal, sigma=1, freq=20):
     """Apply band pass filter to signal (positve frequencies only).
 
     Sigma is the width of the filter. Freq is the position.
@@ -56,7 +56,7 @@ def band_pass_filter(time, signal, sigma=0.43, freq=3.4):
     bp_filter[f <= 0] = 0
     return ifft(fft(signal) * bp_filter)
 
-def measure(capture_time=5, save_data=False):
+def measure(capture_time=1, save_data=False):
     """Acquire data (with capture time in seconds) and calculate the phase
     difference.
 
@@ -116,7 +116,7 @@ def run(output_file, duration, units='m', print_output=True):
 
     # repeatedly acquire data
     while time.time() < start + duration:
-        t, phi, laser_intensity = measure(capture_time=5, save_data=False)
+        t, phi, laser_intensity = measure(save_data=False)
         write_result(output_file, t, phi, laser_intensity)
 
         if print_output:
