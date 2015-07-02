@@ -3,6 +3,7 @@ import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
 import time
 import labview
+import os
 
 
 def calc_phase_difference(time, obj, ref):
@@ -90,13 +91,16 @@ def pretty_print_result(timestamp, phase_difference):
                       phase_difference))
 
 
-def run(output_file, duration, units='m', print_output=True):
+def run(output_file=None, duration=30, units='s', print_output=True):
     """Repeatedly run measurements for specified duration.
-    Save data for output_file. Returns mean and std of phase differences, and
-    number of measurements.
+    Save data for output_file, if specififed.
+    Returns mean and std of phase differences, and number of measurements.
 
-    e.g. run(lambda: print('hello world'), duration=3, units='s')
+    e.g. run('foo.txt', duration=3, units='s')
     """
+
+    if output_file is None:
+        output_file = 'temp.txt'
 
     # Convert time into seconds
     if units == 's': # seconds
@@ -123,4 +127,12 @@ def run(output_file, duration, units='m', print_output=True):
     
     # load all the data to compute stats
     t, phi  = np.loadtxt(output_file, delimiter=',', unpack=True)
+
+    if output_file is 'temp.txt':
+        os.remove('temp.txt')
+
     return np.mean(phi), np.std(phi, ddof=1), len(phi)
+
+if __name__ == '__main__':
+    mean, std, n = run()
+    print('{:.3f} +/- {:.3f} deg (n = {})'.format(mean, std, n))
