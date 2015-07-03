@@ -91,12 +91,29 @@ def pretty_print_result(timestamp, phase_difference):
                       phase_difference))
 
 
-def run(output_file=None, duration=30, units='s', print_output=True):
+def run(output_file=None, duration=30, units='s', print_output=True,
+        log_signals=False):
     """Repeatedly run measurements for specified duration.
-    Save data for output_file, if specififed.
+ 
     Returns mean and std of phase differences, and number of measurements.
 
-    e.g. run('foo.txt', duration=3, units='s')
+    Parameters
+    ----------
+    output_file : str, optional
+        Filename where to save timestamp and phase difference.
+    duration : int
+        Time to repeat measurements for
+    units: str
+        's'(econds), 'm'(inutes), 'h'(ours) or 'd'(ays).
+    print_output: bool
+        If true, print time and phase difference; default: True.
+    log_signals: bool
+        Save raw signal data; default: False.
+    
+    Example
+    -------
+    run('foo.txt', duration=3, units='s')
+
     """
 
     if output_file is None:
@@ -116,10 +133,10 @@ def run(output_file=None, duration=30, units='s', print_output=True):
                           ' or days (d).'))
 
     start = time.time()
-
+    
     # repeatedly acquire data
     while time.time() < start + duration:
-        t, phi = measure(save_data=False)
+        t, phi = measure(save_data=log_signals)
         write_result(output_file, t, phi)
 
         if print_output:
