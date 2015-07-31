@@ -15,6 +15,9 @@ def calc_phase_difference(time, obj, ref):
         obj: object beam signal
         ref: reference beam signal
     """
+    obj = low_pass_filter(time, obj)
+    ref = low_pass_filter(time, ref)
+
     obj = apodise(time, obj)
     ref = apodise(time, ref)
 
@@ -45,17 +48,20 @@ def apodise(time, signal):
     return signal * np.blackman(len(time))
 
 
-def band_pass_filter(time, signal, sigma=1, freq=20):
+def band_pass_filter(time, signal, sigma=2):
     """Apply band pass filter to signal (positve frequencies only).
 
-    Sigma is the width of the filter. Freq is the position.
+    Sigma is the width of the filter. Freq is automatically picked.
 
     Expects and returns 1-D np.arrays.
     """
     f = fftfreq(len(time), time[1]-time[0])
+    sigfft = fft(signal)
+
+    highpass = 5  # Hz, anything below ignored
+    freq = f[f>highpass][np.argmax(sigfft[f>highpass])]
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
-    bp_filter[f <= 0] = 0
-    return ifft(fft(signal) * bp_filter)
+    return ifft(sigfft * bp_filter)
 
 def measure(capture_time=1, save_data=False):
     """Acquire data (with capture time in seconds) and calculate the phase
