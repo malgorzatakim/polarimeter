@@ -59,7 +59,13 @@ def band_pass_filter(time, signal, sigma=2):
     sigfft = fft(signal)
 
     highpass = 5  # Hz, anything below ignored
-    freq = f[f>highpass][np.argmax(sigfft[f>highpass])]
+    
+    """
+    Note that the maximum is picked from np.abs(sigfft) not just
+    sigfft or sigfft**2 and then the bp_filter is applied to sigfft
+    (rather than np.abs(sigfft) or sigfft**2).
+    """
+    freq = f[f>highpass][np.argmax(np.abs(sigfft)[f>highpass])]
     bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
     return ifft(sigfft * bp_filter)
 
