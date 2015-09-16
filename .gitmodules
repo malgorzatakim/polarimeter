@@ -1,6 +1,0 @@
-[submodule "pumpy"]
-	path = pumpy
-	url = git@github.com:jdmgroup/pumpy.git
-[submodule "autosampler"]
-	path = autosampler
-	url = git@github.com:jdmgroup/autosampler
