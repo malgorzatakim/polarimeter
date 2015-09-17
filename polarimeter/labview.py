@@ -31,7 +31,7 @@ def acquire(capture_time, IP='155.198.231.92', port=5020, save_data=False):
 	filename = sock.recv(1024)
 	assert filename[-3:] == 'csv'
 	sock.close()
-	signal_file = 'data/signals/' + filename
+	signal_file = '/home/jdmgroup/signals/' + filename
 	data = np.loadtxt(signal_file, delimiter=',',
                           dtype=np.dtype('d'), unpack=True)
         if save_data is False:
