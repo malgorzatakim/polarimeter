@@ -17,23 +17,23 @@ import os
 socket.setdefaulttimeout(60) # seconds
 
 def acquire(capture_time, IP='155.198.231.92', port=5020, save_data=False):
-	"""Aquires data for capture_time (seconds) via acquisition PC.
-	Returns time, and signals of hannel A and channel B.
-	"""
-	if capture_time <= 0:
-		raise ValueError('capture_time must be greater than zero.')
+    """Aquires data for capture_time (seconds) via acquisition PC.
+    Returns time, and signals of hannel A and channel B.
+    """
+    if capture_time <= 0:
+        raise ValueError('capture_time must be greater than zero.')
 
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect((IP, port))
-	sock.send('%.2f\r' % capture_time)
-	assert sock.recv(1024) == 'acquiring'
-	time.sleep(capture_time + 1)
-	filename = sock.recv(1024)
-	assert filename[-3:] == 'csv'
-	sock.close()
-	signal_file = '/home/jdmgroup/signals/' + filename
-	data = np.loadtxt(signal_file, delimiter=',',
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((IP, port))
+    sock.send(b'%.2f\r' % capture_time)
+    assert sock.recv(1024) == b'acquiring'
+    time.sleep(capture_time + 1)
+    #filename = sock.recv(1024)
+    #assert filename[-3:] == 'csv'
+    sock.close()
+    signal_file = 'C:\\polarimeter\\trace.csv'
+    data = np.loadtxt(signal_file, delimiter=',',
                           dtype=np.dtype('d'), unpack=True)
-        if save_data is False:
-            os.remove(signal_file)
-	return data
+    if save_data is False:
+        os.remove(signal_file)
+    return data
