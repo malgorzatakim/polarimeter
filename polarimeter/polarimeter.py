@@ -44,7 +44,7 @@ class Polarimeter:
         ref = self.__band_pass_filter(time, ref)
 
         delta_phi = np.angle(obj * ref.conjugate(), deg=True) / 2
-        delta_phi = delta_phi[len(delta_phi)*0.2:len(delta_phi)*0.8]
+        delta_phi = delta_phi[int(len(delta_phi)*0.2):int(len(delta_phi)*0.8)]
         delta_phi = np.mean(delta_phi)
         return delta_phi
 
