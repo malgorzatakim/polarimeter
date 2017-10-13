@@ -16,7 +16,7 @@ import os
 
 socket.setdefaulttimeout(60) # seconds
 
-def acquire(capture_time, IP='155.198.231.92', port=5020, save_data=False):
+def acquire(capture_time, IP='155.198.231.92', port=5020, remove_data=False):
     """Aquires data for capture_time (seconds) via acquisition PC.
     Returns time, and signals of hannel A and channel B.
     """
@@ -34,6 +34,6 @@ def acquire(capture_time, IP='155.198.231.92', port=5020, save_data=False):
     signal_file = 'C:\\polarimeter\\trace.csv'
     data = np.loadtxt(signal_file, delimiter=',',
                           dtype=np.dtype('d'), unpack=True)
-    if save_data is False:
+    if remove_data:
         os.remove(signal_file)
     return data
