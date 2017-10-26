@@ -1,26 +1,23 @@
 from __future__ import division
 import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
+from labview import acquire
 import time
 
 
 class Polarimeter:
-    def __init__(self, source, sourceargs=None):
+    def __init__(self, acq_time=5):
         """
         data_source: function that returns (t, chA, chB)
         """
-        self.source = source
-        self.sourceargs = sourceargs
+        self.t = acq_time
         self.last_measured = None
         self.phase_difference = None
 
     def measure(self):
         timestamp = int(time.time())
 
-        if self.sourceargs is not None:
-            data = self.source(**self.sourceargs)
-        else:
-            data = self.source()
+        data = acquire(self.t)
 
         self.phase_difference = self.__calc_phase_difference(*data)
         self.last_measured = timestamp

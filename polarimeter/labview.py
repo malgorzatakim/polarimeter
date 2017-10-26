@@ -9,31 +9,27 @@ copy the file to /home/dcb/polarimeter/data/YYYY-MM-DD-HHMMSS.csv.
 The requesting computer then loads the file, which contais the time
 and signals of the two channels.
 """
-import socket
+#import socket
 import time
 import numpy as np
 import os
 
-socket.setdefaulttimeout(60) # seconds
+#socket.setdefaulttimeout(60) # seconds
 
-def acquire(capture_time, IP='155.198.231.92', port=5020, remove_data=False):
+def acquire(capture_time):
     """Aquires data for capture_time (seconds) via acquisition PC.
     Returns time, and signals of hannel A and channel B.
     """
-    if capture_time <= 0:
-        raise ValueError('capture_time must be greater than zero.')
+    trigger_path = 'C:\\Users\\jdmgroup\\Desktop\\trigger.txt'
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((IP, port))
-    sock.send(b'%.2f\r' % capture_time)
-    assert sock.recv(1024) == b'acquiring'
-    time.sleep(capture_time + 1)
-    #filename = sock.recv(1024)
-    #assert filename[-3:] == 'csv'
-    sock.close()
+    with open(trigger_path,'w') as f:
+        f.write("{}".format(capture_time))
+
+    while True:
+        with open(trigger_path,'r') as f:
+            if f.read() is "0":
+                break
+            time.sleep(0.1)
+
     signal_file = 'C:\\polarimeter\\trace.csv'
-    data = np.loadtxt(signal_file, delimiter=',',
-                          dtype=np.dtype('d'), unpack=True)
-    if remove_data:
-        os.remove(signal_file)
-    return data
+    return np.loadtxt(signal_file, delimiter=',', dtype=np.dtype('d'), unpack=True)
