@@ -6,7 +6,7 @@ import time
 
 
 class Polarimeter:
-    def __init__(self, acq_time=5):
+    def __init__(self, acq_time=1):
         """
         data_source: function that returns (t, chA, chB)
         """

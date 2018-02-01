@@ -1,4 +1,4 @@
-from labview import acquire
+# from labview import acquire
 from polarimeter import Polarimeter
 
 p = Polarimeter()
