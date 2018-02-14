@@ -19,7 +19,7 @@ import os
 def acquire(capture_time):
     """Aquires data for capture_time (seconds) via acquisition PC.
     Returns time, and signals of hannel A and channel B.
-    """
+    ""
     trigger_path = 'C:\\Users\\jdmgroup\\Desktop\\trigger.txt'
 
     with open(trigger_path,'w') as f:
@@ -30,6 +30,7 @@ def acquire(capture_time):
             if f.read() is "0":
                 break
             time.sleep(0.1)
-
-    signal_file = 'C:\\polarimeter\\trace.csv'
+"""
+    #signal_file = 'C:\\polarimeter\\trace.csv'
+    signal_file = "/Users/maglorzatanguyen/Documents/IMPERIAL/Year_4/pol_combinations/trace_ref_7feb.csv"
     return np.loadtxt(signal_file, delimiter=',', dtype=np.dtype('d'), unpack=True)

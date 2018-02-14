@@ -6,18 +6,22 @@ import time
 import matplotlib.pyplot as plt
 
 class Polarimeter:
-    def __init__(self, acq_time=1):
+    def __init__(self, source, sourceargs=None):
         """
         data_source: function that returns (t, chA, chB)
         """
-        self.t = acq_time
+        self.source = source
+        self.sourceargs = sourceargs
         self.last_measured = None
         self.phase_difference = None
 
     def measure(self):
         timestamp = int(time.time())
 
-        data = acquire(self.t)
+        if self.sourceargs is not None:
+            data = self.source(**self.sourceargs)
+        else:
+            data = self.source()
 
         self.phase_difference = self.__calc_phase_difference(*data)
         self.last_measured = timestamp
@@ -45,10 +49,19 @@ class Polarimeter:
         .conjugate() returns complex conjugate
         divided by two because optical rotation = phase difference by 2 (?) value given is most probably
         the optical rotation not the phase difference
+
         """
-        delta_phi = np.angle(obj3 * ref3.conjugate(), deg=True) / 2
-        delta_phi = delta_phi[int(len(delta_phi)*0.2):int(len(delta_phi)*0.8)]
+        delta_phi = np.angle(obj3 * ref3.conjugate()) / 2
+        delta_phi = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
+        delta_phi_st = np.std(delta_phi)
         delta_phi = np.mean(delta_phi)
+        print delta_phi_st
+
+        plt.figure()
+        plt.plot(time, np.real(ref), time, np.real(obj))
+        plt.show()
+
+        """
 
         fig = plt.figure()
         ax1 = fig.add_subplot(221)
@@ -65,6 +78,8 @@ class Polarimeter:
         plt.title('after band pass')
         plt.show()
 
+        """
+
         return delta_phi
 
     def __low_pass_filter(self, time, signal, fwhm=100):
@@ -73,6 +88,7 @@ class Polarimeter:
         Returns np.array containing the low-pass filtered signal.
         """
         f = fftfreq(len(time), time[1]-time[0])
+        #lp_filter = 1 /(1 + (f / 100) ** 2)
         sigma = fwhm / (2 * np.sqrt(2 * np.log(2)))
         freq = 0
         lp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
@@ -81,7 +97,7 @@ class Polarimeter:
     def __apodise(self, time, signal):
         """__Apodise the signal. Expects and returns np.arrays.
         """
-        return signal * np.blackman(len(time))
+        return signal * np.blackman(len(time)) #why blackman
 
     def __band_pass_filter(self, time, signal, sigma=2):
         """Apply band pass filter to signal (positve frequencies only).
