@@ -51,18 +51,17 @@ class Polarimeter:
         the optical rotation not the phase difference
 
         """
-        delta_phi = np.angle(obj3 * ref3.conjugate()) / 2
-        delta_phi = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
-        delta_phi_st = np.std(delta_phi)
-        delta_phi = np.mean(delta_phi)
+        delta_phi = np.angle(obj3 * ref3.conjugate(), deg=True) / 2
+        delta_phi_crop = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
+        delta_phi_st = np.std(delta_phi_crop)
+        delta_phi_mean = np.mean(delta_phi_crop)
         print delta_phi_st
-
+        """
         plt.figure()
         plt.plot(time, np.real(ref), time, np.real(obj))
         plt.show()
 
         """
-
         fig = plt.figure()
         ax1 = fig.add_subplot(221)
         ax1.plot(time, np.real(ref), time, np.real(obj))
@@ -71,16 +70,16 @@ class Polarimeter:
         ax2.plot(time, np.real(ref1), time, np.real(obj1))
         plt.title('after low pass')
         ax3 = fig.add_subplot(223)
-        ax3.plot(time, np.real(ref2), time, np.real(obj2))
-        plt.title('after apodise')
+        #ax3.plot(time, np.real(ref2), time, np.real(obj2))
+        #plt.title('after apodise')
+        ax3.plot(time, delta_phi)
+        plt.title('delta_phi')
         ax4 = fig.add_subplot(224)
         ax4.plot(time, np.real(ref3), time, np.real(obj3))
         plt.title('after band pass')
         plt.show()
 
-        """
-
-        return delta_phi
+        return delta_phi_mean
 
     def __low_pass_filter(self, time, signal, fwhm=100):
         """Apply a low pass filter to the signal (np.array).

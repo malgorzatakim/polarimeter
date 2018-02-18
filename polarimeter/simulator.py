@@ -3,7 +3,7 @@ import numpy as np
 from random import random
 
 
-def simulate_signals(time=1, phase_difference=60, samplingrate=125000):
+def simulate_signals(time=1, phase_difference=14, samplingrate=20000):
     """
     capture_time (s)
     phase_difference (degrees)

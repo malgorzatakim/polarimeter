@@ -3,7 +3,7 @@ import numpy as np
 from random import random
 
 
-def simulate_signals(time=0.3, phase_difference=60, samplingrate=125000):
+def simulate_signals(time=0.3, phase_difference=60, samplingrate=16000):
     """
     capture_time (s)
     phase_difference (degrees)
@@ -20,7 +20,7 @@ def simulate_signals(time=0.3, phase_difference=60, samplingrate=125000):
     sigA += np.random.rand(len(sigA)) * 0.01
 
     # Add the phase difference for chB
-    phiB = np.pi * 0.333
+    phiB = phiA - np.pi * (1/3)
     sigB = B * np.cos(2 * np.pi * f * t + phiB) ** 2 +T0
     sigB += np.random.rand(len(sigB)) * 0.01
     return t, sigA, sigB
