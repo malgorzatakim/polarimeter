@@ -24,7 +24,7 @@ class Polarimeter:
         else:
             data = self.source()
 
-        self.phase_difference, self.stdeviaition = self.__calc_phase_difference(*data)
+        self.phase_difference, self.stdeviation = self.__calc_phase_difference(*data)
         self.last_measured = timestamp
 
     def __calc_phase_difference(self, time, obj, ref):
@@ -54,9 +54,9 @@ class Polarimeter:
 
         delta_phi = np.angle(obj3 * ref3.conjugate(), deg=True) / 2
         delta_phi_crop = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
-        delta_phi_st = np.std(delta_phi_crop)
+        delta_phi_std = np.std(delta_phi_crop)
         delta_phi_mean = np.mean(delta_phi_crop)
-        print delta_phi_st
+        print delta_phi_std
         """
         fig = plt.figure()
         ax1 = fig.add_subplot(221)
