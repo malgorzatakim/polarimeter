@@ -3,6 +3,7 @@ import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
 from labview import acquire
 import time
+from plotting import plot
 import matplotlib.pyplot as plt
 
 class Polarimeter:
@@ -49,18 +50,13 @@ class Polarimeter:
         .conjugate() returns complex conjugate
         divided by two because optical rotation = phase difference by 2 (?) value given is most probably
         the optical rotation not the phase difference
-
         """
+
         delta_phi = np.angle(obj3 * ref3.conjugate(), deg=True) / 2
         delta_phi_crop = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
         delta_phi_st = np.std(delta_phi_crop)
         delta_phi_mean = np.mean(delta_phi_crop)
         print delta_phi_st
-        """
-        plt.figure()
-        plt.plot(time, np.real(ref), time, np.real(obj))
-        plt.show()
-
         """
         fig = plt.figure()
         ax1 = fig.add_subplot(221)
@@ -78,7 +74,13 @@ class Polarimeter:
         ax4.plot(time, np.real(ref3), time, np.real(obj3))
         plt.title('after band pass')
         plt.show()
-
+        """
+        """
+        data_obj = [obj, obj1, obj2, obj3]
+        data_ref = [ref, ref1, ref2, ref3]
+        titles = ["raw data", "after low pass", "after apodise", "after band pass"]
+        plot(time, data_obj, data_ref, titles)
+        """
         return delta_phi_mean
 
     def __low_pass_filter(self, time, signal, fwhm=100):
@@ -100,9 +102,7 @@ class Polarimeter:
 
     def __band_pass_filter(self, time, signal, sigma=2):
         """Apply band pass filter to signal (positve frequencies only).
-
         Sigma is the width of the filter. Freq is automatically picked.
-
         Expects and returns 1-D np.arrays.
         """
         f = fftfreq(len(time), time[1]-time[0])
