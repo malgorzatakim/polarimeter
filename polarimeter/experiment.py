@@ -4,7 +4,7 @@ from polarimeter import Polarimeter
 p = Polarimeter()
 p.measure()
 
-print('{} at {}'.format(p.phase_difference, p.last_measured))
+print('{} +/- {} at {}'.format(p.phase_difference, p.stdeviatiion p.last_measured))
 
 
 # import os

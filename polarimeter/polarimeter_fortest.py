@@ -24,7 +24,7 @@ class Polarimeter:
         else:
             data = self.source()
 
-        self.phase_difference = self.__calc_phase_difference(*data)
+        self.phase_difference, self.stdeviaition = self.__calc_phase_difference(*data)
         self.last_measured = timestamp
 
     def __calc_phase_difference(self, time, obj, ref):
@@ -81,7 +81,7 @@ class Polarimeter:
         titles = ["raw data", "after low pass", "after apodise", "after band pass"]
         plot(time, data_obj, data_ref, titles)
         """
-        return delta_phi_mean
+        return delta_phi_mean, delta_phi_std
 
     def __low_pass_filter(self, time, signal, fwhm=100):
         """Apply a low pass filter to the signal (np.array).
