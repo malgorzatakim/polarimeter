@@ -13,6 +13,7 @@ class Polarimeter:
         self.t = acq_time
         self.last_measured = None
         self.phase_difference = None
+        self.stdeviation = None
 
     def measure(self):
         timestamp = int(time.time())

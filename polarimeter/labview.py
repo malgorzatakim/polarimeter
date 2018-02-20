@@ -13,7 +13,7 @@ and signals of the two channels.
 import time
 import numpy as np
 import os
-
+import shutil
 #socket.setdefaulttimeout(60) # seconds
 
 def acquire(capture_time):
@@ -31,6 +31,9 @@ def acquire(capture_time):
                 break
             time.sleep(0.1)
 
-    signal_file = 'C:\\polarimeter\\trace.csv'
+    filepath_old = "C:\\polarimeter\\trace.csv"
+    filepath_new = os.path.join("C:\\polarimeter\\results_trace\\" + str(int(time.time())) + ".csv")
+    shutil.move(filepath_old, filepath_new)
+    #signal_file = 'C:\\polarimeter\\trace.csv'
     #signal_file = "/Users/maglorzatanguyen/Documents/IMPERIAL/Year_4/pol_combinations/trace_ref_7feb.csv"
-    return np.loadtxt(signal_file, delimiter=',', dtype=np.dtype('d'), unpack=True)
+    return np.loadtxt(filepath_new, delimiter=',', dtype=np.dtype('d'), unpack=True)
