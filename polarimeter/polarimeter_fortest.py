@@ -56,7 +56,6 @@ class Polarimeter:
         delta_phi_crop = delta_phi[int(len(delta_phi)*0.25):int(len(delta_phi)*0.75)]
         delta_phi_std = np.std(delta_phi_crop)
         delta_phi_mean = np.mean(delta_phi_crop)
-        print delta_phi_std
         """
         fig = plt.figure()
         ax1 = fig.add_subplot(221)

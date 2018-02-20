@@ -14,9 +14,9 @@ results_file = os.path.join("C:\\polarimeter\\results\\" + str(timestamp) + ".tx
 #### build string from 3 parts: path to file (basic name), timestamp, ".txt"
 
 with open(results_file, "w") as f:
-  for _ in range(x):
-    for _ in range(y):
-      p.measure()
-      f.write("{},{},{}\n".format(p.last_measured, p.phase_difference, p.stdeviation))
-      #time.sleep(60)
-  f.flush()
+    for _ in range(x):
+        for _ in range(y):
+            p.measure()
+            f.write("{},{},{}\n".format(p.last_measured, p.phase_difference, p.stdeviation))
+        #time.sleep(300)
+        f.flush()
