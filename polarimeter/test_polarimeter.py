@@ -9,11 +9,12 @@ class Test(unittest.TestCase):
 
     def test_measure(self):
         """Test p.measure() with simulate_signals"""
-        phase_difference = 60
+        phase_difference = 14
         p = Polarimeter(source=simulate_signals,
                         sourceargs={'phase_difference': phase_difference})
         p.measure()
         print p.phase_difference
+        print p.stdeviation
         self.assertIsInstance(p.last_measured, int)
         self.assertIsInstance(p.phase_difference, float)
         self.assertAlmostEqual(p.phase_difference, phase_difference, places=5)
@@ -25,6 +26,7 @@ class Test(unittest.TestCase):
                         sourceargs={'phase_difference': phase_difference})
         p.measure()
         print p.phase_difference
+        print p.stdeviation
         self.assertIsInstance(p.last_measured, int)
         self.assertIsInstance(p.phase_difference, float)
         self.assertAlmostEqual(p.phase_difference, phase_difference, places=5)
