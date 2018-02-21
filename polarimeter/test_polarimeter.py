@@ -1,6 +1,6 @@
 from __future__ import division
 import unittest
-from polarimeter_fortest import Polarimeter
+from polarimeter import Polarimeter
 from simulator import simulate_signals, simulate_signals_j
 
 

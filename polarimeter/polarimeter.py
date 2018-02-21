@@ -6,11 +6,12 @@ import time
 import matplotlib.pyplot as plt
 
 class Polarimeter:
-    def __init__(self, acq_time=1):
+    def __init__(self, source, sourceargs=None):
         """
         data_source: function that returns (t, chA, chB)
         """
-        self.t = acq_time
+        self.source = source
+        self.sourceargs = sourceargs
         self.last_measured = None
         self.phase_difference = None
         self.stdeviation = None
@@ -18,7 +19,10 @@ class Polarimeter:
     def measure(self):
         timestamp = int(time.time())
 
-        data = acquire(self.t)
+        if self.sourceargs is not None:
+            data = self.source(**self.sourceargs)
+        else:
+            data = self.source()
 
         self.phase_difference, self.stdeviation = self.__calc_phase_difference(*data)
         self.last_measured = timestamp

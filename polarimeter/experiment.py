@@ -1,7 +1,7 @@
-# from labview import acquire
+from labview import acquire
 from polarimeter import Polarimeter
 
-p = Polarimeter()
+p = Polarimeter(source=acquire, sourceargs={'capture_time': 1, })
 p.measure()
 
 print('{} +/- {} at {}'.format(p.phase_difference, p.stdeviation, p.last_measured))
