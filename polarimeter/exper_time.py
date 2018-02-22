@@ -5,7 +5,7 @@ from simulator import simulate_signals
 
 #phase_difference = 60
 #p = Polarimeter(source=simulate_signals, sourceargs={'phase_difference': phase_difference})
-p = Polarimeter()
+p = Polarimeter(source=acquire, sourceargs={'capture_time': 1, })
 x = 5 # how many flushes to file
 y = 10 # experiment count per one flush
 timestamp = int(time.time())

@@ -19,7 +19,7 @@ import shutil
 def acquire(capture_time):
     """Aquires data for capture_time (seconds) via acquisition PC.
     Returns time, and signals of hannel A and channel B.
-    
+    """
     trigger_path = 'C:\\Users\\jdmgroup\\Desktop\\trigger.txt'
 
     with open(trigger_path,'w') as f:
@@ -36,5 +36,18 @@ def acquire(capture_time):
     shutil.move(filepath_old, filepath_new)
     """
     #signal_file = 'C:\\polarimeter\\trace.csv'
-    filepath_new = "/Users/maglorzatanguyen/Documents/IMPERIAL/Year_4/pol_combinations/trace_ref_7feb.csv"
+
+    folder_path_old = "/Users/maglorzatanguyen/Desktop/results_trace1/"
+    folder_path_new = "/Users/maglorzatanguyen/Desktop/results_trace_into/"
+
+    all_filenames = os.listdir(folder_path_old)
+    filtered_filenames = [file for file in all_filenames if file.endswith(".csv")]
+    filename = sorted(filtered_filenames)[0]
+
+    filepath_old = folder_path_old + filename
+    filepath_new = folder_path_new + filename
+
+    shutil.move(filepath_old, filepath_new)
+"""
+    #filepath_new = "/Users/maglorzatanguyen/Documents/IMPERIAL/Year_4/pol_combinations/trace_ref_7feb.csv"
     return np.loadtxt(filepath_new, delimiter=',', dtype=np.dtype('d'), unpack=True)
