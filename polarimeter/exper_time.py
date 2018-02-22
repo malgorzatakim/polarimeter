@@ -2,6 +2,7 @@ from polarimeter import Polarimeter
 import time
 import os
 from simulator import simulate_signals
+from labview import acquire
 
 #phase_difference = 60
 #p = Polarimeter(source=simulate_signals, sourceargs={'phase_difference': phase_difference})
