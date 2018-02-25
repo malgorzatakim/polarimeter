@@ -1,35 +1,33 @@
 from __future__ import division
 import unittest
 from polarimeter import Polarimeter
-from simulator import simulate_signals, simulate_signals_j
+from data_acquirers import SimulatedDataAcquirer, SimulatedDataAcquirerJ
 
 
 class Test(unittest.TestCase):
     """Tests for polarimeter.py"""
 
     def test_measure(self):
-        """Test p.measure() with simulate_signals"""
+        """Test p.measure() with SimulatedDataAcquirer"""
         phase_difference = 14
-        p = Polarimeter(source=simulate_signals,
-                        sourceargs={'phase_difference': phase_difference})
-        p.measure()
-        print p.phase_difference
-        print p.stdeviation
-        self.assertIsInstance(p.last_measured, int)
-        self.assertIsInstance(p.phase_difference, float)
-        self.assertAlmostEqual(p.phase_difference, phase_difference, places=5)
+        acquirer = SimulatedDataAcquirer(phase_difference=phase_difference)
+        p = Polarimeter()
+        phase_diff, stdev = p.measure(*acquirer.acquire())
+        print phase_diff
+        print stdev
+        self.assertIsInstance(phase_diff, float)
+        self.assertAlmostEqual(phase_diff, phase_difference, places=5)
 
     def test_measure_j(self):
-        """Test p.measure() with simulate_signals_j"""
+        """Test p.measure() with SimulatedDataAcquirerJ"""
         phase_difference = 60
-        p = Polarimeter(source=simulate_signals_j,
-                        sourceargs={'phase_difference': phase_difference})
-        p.measure()
-        print p.phase_difference
-        print p.stdeviation
-        self.assertIsInstance(p.last_measured, int)
-        self.assertIsInstance(p.phase_difference, float)
-        self.assertAlmostEqual(p.phase_difference, phase_difference, places=5)
+        acquirer = SimulatedDataAcquirerJ()
+        p = Polarimeter()
+        phase_diff, stdev = p.measure(*acquirer.acquire())
+        print phase_diff
+        print stdev
+        self.assertIsInstance(phase_diff, float)
+        self.assertAlmostEqual(phase_diff, phase_difference, places=5)
 
 if __name__ == '__main__':
     unittest.main()

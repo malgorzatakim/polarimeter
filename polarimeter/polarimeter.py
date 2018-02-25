@@ -1,33 +1,11 @@
 from __future__ import division
 import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
-from labview import acquire
 import time
 import matplotlib.pyplot as plt
 
 class Polarimeter:
-    def __init__(self, source, sourceargs=None):
-        """
-        data_source: function that returns (t, chA, chB)
-        """
-        self.source = source
-        self.sourceargs = sourceargs
-        self.last_measured = None
-        self.phase_difference = None
-        self.stdeviation = None
-
-    def measure(self):
-        timestamp = int(time.time())
-
-        if self.sourceargs is not None:
-            data = self.source(**self.sourceargs)
-        else:
-            data = self.source()
-
-        self.phase_difference, self.stdeviation = self.__calc_phase_difference(*data)
-        self.last_measured = timestamp
-
-    def __calc_phase_difference(self, time, obj, ref):
+    def measure(self, time, obj, ref):
         """Calculate the phase difference between the reference and object
         signals. Returns phase difference in degrees.
 

@@ -1,10 +1,12 @@
-from labview import acquire
+from data_acquirers import RealDataAcquirer
 from polarimeter import Polarimeter
 
-p = Polarimeter(source=acquire, sourceargs={'capture_time': 1, })
-p.measure()
+capture_time = 1
+acquirer = RealDataAcquirer(capture_time)
+p = Polarimeter()
+phase_diff, stdev = p.measure(*acquirer.acquire())
 
-print('{} +/- {} at {}'.format(p.phase_difference, p.stdeviation, p.last_measured))
+print('{} +/- {} at {}'.format(phase_diff, stdev, acquirer.lastDataTimestamp()))
 
 
 # import os

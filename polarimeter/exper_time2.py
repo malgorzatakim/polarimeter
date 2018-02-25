@@ -1,13 +1,13 @@
-from polarimeter_fortest import Polarimeter
+from data_acquirers import SimulatedDataAcquirer
+from polarimeter import Polarimeter
 import time
 import os
-from simulator import simulate_signals
 import numpy as np
-from labview import acquire
 
 phase_difference = 60
-p = Polarimeter(source=simulate_signals, sourceargs={'phase_difference': phase_difference})
-#p = Polarimeter()
+acquirer = SimulatedDataAcquirer(phase_difference=phase_difference)
+p = Polarimeter()
+
 x = 6 # how many flushes to file, no of data points
 y = 10 # experiments taken into mean
 timestamp = int(time.time())
@@ -20,8 +20,8 @@ with open(results_file, "w") as f:
         t = int(time.time())
         data = []
         for _ in range(y):
-            p.measure()
-            data.append([p.last_measured, p.phase_difference, p.stdeviation])
+            phase_diff, stdev = p.measure(*acquirer.acquire())
+            data.append([acquirer.lastDataTimestamp(), phase_diff, stdev])
         phase = []
         stdev = []
         for i in range(len(data)):

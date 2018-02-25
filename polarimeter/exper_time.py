@@ -1,23 +1,22 @@
 from polarimeter import Polarimeter
+from data_acquirers import RealDataAcquirer
 import time
 import os
-from simulator import simulate_signals
-from labview import acquire
 
-#phase_difference = 60
-#p = Polarimeter(source=simulate_signals, sourceargs={'phase_difference': phase_difference})
-p = Polarimeter(source=acquire, sourceargs={'capture_time': 1, })
+capture_time = 1
+acquirer = RealDataAcquirer(capture_time)
+p = Polarimeter()
 x = 5 # how many flushes to file
 y = 10 # experiment count per one flush
 timestamp = int(time.time())
 #results_file = os.path.join("/Users/maglorzatanguyen/Desktop/results/" + str(timestamp) + ".txt")
 results_file = os.path.join("C:\\polarimeter\\results\\" + str(timestamp) + ".txt")
-#### build string from 3 parts: path to file (basic name), timestamp, ".txt"
 
 with open(results_file, "w") as f:
     for _ in range(x):
         for _ in range(y):
-            p.measure()
-            f.write("{},{},{}\n".format(p.last_measured, p.phase_difference, p.stdeviation))
+            data = acquirer.acquire()
+            phase_diff, stdev = p.measure(*data)
+            f.write("{},{},{}\n".format(acquirer.lastDataTimestamp(), phase_diff, stdev))
         #time.sleep(300)
         f.flush()
