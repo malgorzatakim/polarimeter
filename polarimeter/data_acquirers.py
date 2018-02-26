@@ -110,7 +110,7 @@ class RecordedDataAcquirer(IDataAcquirer):
     def __init__(self, folder_path):
         self.folder_path = folder_path
         all_filenames = os.listdir(folder_path)
-        filtered_filenames = [file for file in all_filenames if file.endswith(".txt")]
+        filtered_filenames = [file for file in all_filenames if file.endswith(".csv")]
         self.recorded_data_files = list(reversed(filtered_filenames))
 
     def acquire(self):
