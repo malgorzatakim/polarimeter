@@ -3,9 +3,11 @@ import numpy as np
 from scipy.fftpack import ifft, fft, fftfreq
 import time
 import matplotlib.pyplot as plt
+from math import sqrt, ceil
+
 
 class Polarimeter:
-    def measure(self, time, obj, ref):
+    def measure(self, time, obj, ref, plot = False):
         """Calculate the phase difference between the reference and object
         signals. Returns phase difference in degrees.
 
@@ -23,6 +25,14 @@ class Polarimeter:
         obj3 = self.__band_pass_filter(time, obj2)
         ref3 = self.__band_pass_filter(time, ref2)
 
+        if plot:
+            plotter = Plotter()
+            plotter.addPlot([time, np.real(ref), time, np.real(obj), "raw_data"])
+            plotter.addPlot([time, np.real(ref1), time, np.real(obj1), "fd;lfdraw_data"])
+            plotter.addPlot([time, np.real(ref2), time, np.real(obj2), "raw_daflkdjfldskta"])
+            plotter.addPlot([time, np.real(ref3), time, np.real(obj3), "raw_dajklsdfkjlsta"])
+            plotter.show()
+
         """
         np.angle converts complex no. into angle in degrees if deg=True
         .conjugate() returns complex conjugate
@@ -33,22 +43,9 @@ class Polarimeter:
         delta_phi = delta_phi[int(len(delta_phi)*0.2):int(len(delta_phi)*0.8)]
         delta_phi_std = np.std(delta_phi)
         delta_phi_mean = np.mean(delta_phi)
-        """
-        fig = plt.figure()
-        ax1 = fig.add_subplot(221)
-        ax1.plot(time, np.real(ref), time, np.real(obj))
-        plt.title('raw data')
-        ax2 = fig.add_subplot(222)
-        ax2.plot(time, np.real(ref1), time, np.real(obj1))
-        plt.title('after low pass')
-        ax3 = fig.add_subplot(223)
-        ax3.plot(time, np.real(ref2), time, np.real(obj2))
-        plt.title('after apodise')
-        ax4 = fig.add_subplot(224)
-        ax4.plot(time, np.real(ref3), time, np.real(obj3))
-        plt.title('after band pass')
-        plt.show()
-        """
+
+
+
         return delta_phi_mean, delta_phi_std
 
     def __low_pass_filter(self, time, signal, fwhm=100):

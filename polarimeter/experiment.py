@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-
 from data_acquirers import RealDataAcquirer, SimulatedDataAcquirer, RecordedDataAcquirer
 from polarimeter import Polarimeter
 import time
