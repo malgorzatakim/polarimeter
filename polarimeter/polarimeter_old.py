@@ -5,8 +5,6 @@ import time
 import matplotlib.pyplot as plt
 from math import sqrt, ceil
 
-from numpy.fft import rfft, irfft
-from scipy import signal
 
 class Polarimeter:
     def measure(self, time, obj, ref, plot = False):
@@ -47,22 +45,6 @@ class Polarimeter:
         delta_phi_mean = np.mean(delta_phi)
 
 
-        # Alternative calculation
-        print "\nHIL_B"
-        obj_filtered = self.__band_pass_filter2(time, obj2)
-        ref_filtered = self.__band_pass_filter2(time, ref2)
-
-        obj_h = signal.hilbert(obj_filtered)
-        ref_h = signal.hilbert(ref_filtered)
-        phases = np.angle(obj_h / ref_h, deg=True) / 2
-        #phases = (np.angle(obj_h, deg=True) - np.angle(ref_h, deg=True)) / 2
-        #phases = phases[int(len(phases)*0.2):int(len(phases)*0.8)]
-
-        phases_std = np.std(phases)
-        phases_mean = np.mean(phases)
-        print phases_mean, phases_std
-        print "HIL_E\n"
-
 
         return delta_phi_mean, delta_phi_std
 
@@ -100,35 +82,5 @@ class Polarimeter:
         (rather than np.abs(sigfft) or sigfft**2).
         """
         freq = f[f>highpass][np.argmax(np.abs(sigfft)[f>highpass])]
-
         bp_filter = np.exp(-(f-freq)**2 / (2*(sigma**2)))
-
         return ifft(sigfft * bp_filter)
-
-    def __band_pass_filter2(self, time, signal, min_freq=5, sigma=2):
-        # 1. Get frequency domain.
-        # Full frequency domain
-        freq_full = fftfreq(len(time), time[1]-time[0])
-        # Adjust frequency domain - input signal has only real values
-        freq_real = np.abs(freq_full[0: len(time) // 2 + 1])
-
-        # 2. Do DFT for a real-valued signal.
-        sigrfft = rfft(signal)
-
-        # 3. Find freq with max amplitude in the DFT result.
-        # Consider only fft values for freqs > min_freq
-        sigrfft_above_min = sigrfft[freq_real > min_freq]
-        # Get corresponding freqs
-        freq_real_above_min = freq_real[freq_real > min_freq]
-        # Find freq with max amplitude - np.abs needed for np.argmax to choose
-        # complex number from sigrfft_above_min with biggest magnitude
-        freq_max_amp = freq_real_above_min[np.argmax(np.abs(sigrfft_above_min))]
-
-        # 4. Prepare filter for filtering out values from our DFT result.
-        # Guassian filter
-        bp_filter = np.exp(-(freq_real-freq_max_amp)**2 / (2*(sigma**2)))
-        # Rectangular filter - bitmask
-        #bp_filter = [int(np.abs(f - freq_max_amp) <= sigma) for f in freq_real]
-
-
-        return irfft(sigrfft * bp_filter)
