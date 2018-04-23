@@ -4,9 +4,9 @@ from scipy.fftpack import ifft, fft, fftfreq
 import time
 import matplotlib.pyplot as plt
 from math import sqrt, ceil
-
-from numpy.fft import rfft, irfft
+from numpy.fft import rfft, irfft, rfftfreq
 from scipy import signal
+#from plotter import Plotter
 
 class Polarimeter:
     def measure(self, time, obj, ref, plot = False):
@@ -29,7 +29,7 @@ class Polarimeter:
 
         if plot:
             plotter = Plotter()
-            plotter.addPlot([time, np.real(ref), time, np.real(obj), "raw_data"])
+            plotter.addPlot([time, ref, time, obj, "raw_data"])
             plotter.addPlot([time, np.real(ref1), time, np.real(obj1), "fd;lfdraw_data"])
             plotter.addPlot([time, np.real(ref2), time, np.real(obj2), "raw_daflkdjfldskta"])
             plotter.addPlot([time, np.real(ref3), time, np.real(obj3), "raw_dajklsdfkjlsta"])
@@ -57,7 +57,6 @@ class Polarimeter:
         phases = np.angle(obj_h / ref_h, deg=True) / 2
         #phases = (np.angle(obj_h, deg=True) - np.angle(ref_h, deg=True)) / 2
         #phases = phases[int(len(phases)*0.2):int(len(phases)*0.8)]
-
         phases_std = np.std(phases)
         phases_mean = np.mean(phases)
         print phases_mean, phases_std
@@ -108,9 +107,9 @@ class Polarimeter:
     def __band_pass_filter2(self, time, signal, min_freq=5, sigma=2):
         # 1. Get frequency domain.
         # Full frequency domain
-        freq_full = fftfreq(len(time), time[1]-time[0])
+        freq_real = rfftfreq(len(time), time[1]-time[0])
         # Adjust frequency domain - input signal has only real values
-        freq_real = np.abs(freq_full[0: len(time) // 2 + 1])
+        #freq_real = np.abs(freq_full[0: len(time) // 2 + 1])
 
         # 2. Do DFT for a real-valued signal.
         sigrfft = rfft(signal)

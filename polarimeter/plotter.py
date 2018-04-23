@@ -5,10 +5,10 @@ class Plotter(object):
     def __init__(self):
         self.plots = []
 
-    def addPlot(data, title):
+    def addPlot(self, data, title):
         plots.append((data, title))
 
-    def show():
+    def show(self):
         plt.figure()
         count = len(plots)
         size = int(ceil(sqrt(count))
