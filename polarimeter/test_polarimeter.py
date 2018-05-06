@@ -1,7 +1,7 @@
 from __future__ import division
 import unittest
 from polarimeter import Polarimeter
-from data_acquirers import SimulatedDataAcquirer, SimulatedDataAcquirerJ
+from data_acquirers import SimulatedDataAcquirer
 
 
 class Test(unittest.TestCase):
@@ -16,18 +16,18 @@ class Test(unittest.TestCase):
         print phase_diff
         print stdev
         self.assertIsInstance(phase_diff, float)
-        self.assertAlmostEqual(phase_diff, phase_difference, places=5)
+        self.assertAlmostEqual(phase_diff, phase_difference, places=2)
 
-    def test_measure_j(self):
-        """Test p.measure() with SimulatedDataAcquirerJ"""
+    def test_measure2(self):
+        """Test p.measure() with SimulatedDataAcquirer"""
         phase_difference = 60
-        acquirer = SimulatedDataAcquirerJ()
+        acquirer = SimulatedDataAcquirer(phase_difference=phase_difference, time=0.3, amp_A=1, amp_B=0.9)
         p = Polarimeter()
         phase_diff, stdev = p.measure(*acquirer.acquire())
         print phase_diff
         print stdev
         self.assertIsInstance(phase_diff, float)
-        self.assertAlmostEqual(phase_diff, phase_difference, places=5)
+        self.assertAlmostEqual(phase_diff, phase_difference, places=2)
 
 if __name__ == '__main__':
     unittest.main()

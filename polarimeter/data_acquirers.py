@@ -49,7 +49,7 @@ class RealDataAcquirer(IDataAcquirer):
         return self.last_data_timestamp
 
 class SimulatedDataAcquirer(IDataAcquirer):
-    def __init__(self, time=1, phase_difference=14, samplingrate=16384):
+    def __init__(self, time=1, phase_difference=14, samplingrate=16384, amp_A=1, amp_B=1):
         """
         capture_time (s)
         phase_difference (degrees)
@@ -58,53 +58,25 @@ class SimulatedDataAcquirer(IDataAcquirer):
         self.time = time
         self.phase_difference = phase_difference
         self.samplingrate = samplingrate
+        self.amp_A = amp_A
+        self.amp_B = amp_B
 
     def acquire(self):
         t = np.arange(0, self.time, 1 / self.samplingrate)
         f = 10
-        A = 1
         # Random initial phase for chA
         phiA = random() * 2 * np.pi
-        sigA = A * np.cos(2 * np.pi * f * t + phiA) ** 2
-        sigA += np.random.rand(len(sigA)) * 0.01 * A
+        sigA = self.amp_A * np.cos(2 * np.pi * f * t + phiA) ** 2
+        sigA += np.random.rand(len(sigA)) * 0.01 * self.amp_A
 
         # Add the phase difference for chB
         phiB = phiA - (self.phase_difference * np.pi / 180)
-        sigB = A * np.cos(2 * np.pi * f * t + phiB) ** 2
-        sigB += np.random.rand(len(sigB)) * 0.01 * A
+        sigB = self.amp_B * np.cos(2 * np.pi * f * t + phiB) ** 2
+        sigB += np.random.rand(len(sigB)) * 0.01 * self.amp_B
         return t, sigA, sigB
 
     def lastDataTimestamp(self):
         return str(int(time.time()))
-
-class SimulatedDataAcquirerJ(IDataAcquirer):
-    def __init__(self, time=0.3, samplingrate=16384):
-        """
-        capture_time (s)
-        samplingrate (Hz)
-        """
-        self.time = time
-        self.samplingrate = samplingrate
-
-    def acquire(self):
-        t = np.arange(0, self.time, 1 / self.samplingrate)
-        f = 10
-        A = 0.6
-        B = 0.7
-        T0 = 0.2
-        # Random initial phase for chA
-        phiA = 0
-        sigA = A * np.cos(2 * np.pi * f * t + phiA) ** 2 + T0
-        sigA += np.random.rand(len(sigA)) * 0.01
-
-        # Add the phase difference for chB
-        phiB = phiA - np.pi * (1/3)
-        sigB = B * np.cos(2 * np.pi * f * t + phiB) ** 2 +T0
-        sigB += np.random.rand(len(sigB)) * 0.01
-        return t, sigA, sigB
-
-    def lastDataTimestamp(self):
-        str(int(time.time()))
 
 class RecordedDataAcquirer(IDataAcquirer):
     def __init__(self, folder_path):
