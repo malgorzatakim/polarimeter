@@ -1,2 +1,2 @@
 *.pyc
-polarimeter/data/*
+config_*.json

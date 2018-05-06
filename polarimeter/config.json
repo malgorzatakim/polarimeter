@@ -1,0 +1,9 @@
+{
+    "experiment_trigger_file":"__PLACEHOLDER__",
+    "experiment_raw_data_file":"__PLACEHOLDER__",
+    "experiment_raw_data_destination_folder":"__PLACEHOLDER__",
+    "experiment_results_folder":"__PLACEHOLDER__",
+    "rerunning_data_folder":"__PLACEHOLDER__",
+    "rerunning_results_file":"__PLACEHOLDER__",
+    "laser_folder":"__PLACEHOLDER__"
+}

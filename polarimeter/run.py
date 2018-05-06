@@ -4,11 +4,15 @@ from polarimeter import Polarimeter
 import time
 import os
 import numpy as np
+import json
 
 class Runner():
+    def __init__(self, config):
+        self.config = config
+
     def experiment(self):
         capture_time = 1
-        acquirer = RealDataAcquirer(capture_time)
+        acquirer = RealDataAcquirer(capture_time, self.config)
         p = Polarimeter()
         phase_diff, stdev = p.measure(*acquirer.acquire())
 
@@ -16,13 +20,12 @@ class Runner():
 
     def exper_time(self):
         capture_time = 1
-        acquirer = RealDataAcquirer(capture_time)
+        acquirer = RealDataAcquirer(capture_time, self.config)
         p = Polarimeter()
         x = 5 # how many flushes to file
         y = 10 # experiment count per one flush
         timestamp = int(time.time())
-        #results_file = os.path.join("/Users/maglorzatanguyen/Desktop/results/" + str(timestamp) + ".txt")
-        results_file = os.path.join("C:\\polarimeter\\results\\" + str(timestamp) + ".txt")
+        results_file = os.path.join(self.config["experiment_results_folder"] + str(timestamp) + ".txt")
 
         with open(results_file, "w") as f:
             for _ in range(x):
@@ -41,9 +44,7 @@ class Runner():
         x = 6 # how many flushes to file, no of data points
         y = 10 # experiments taken into mean
         timestamp = int(time.time())
-        results_file = os.path.join("/Users/maglorzatanguyen/Desktop/results/" + str(timestamp) + ".txt")
-        #results_file = os.path.join("C:\\polarimeter\\results\\" + str(timestamp) + ".txt")
-        #### build string from 3 parts: path to file (basic name), timestamp, ".txt"
+        results_file = os.path.join(self.config["experiment_results_folder"] + str(timestamp) + ".txt")
 
         with open(results_file, "w") as f:
             for _ in range(x):
@@ -61,11 +62,9 @@ class Runner():
                 f.flush()
 
     def rerunning(self):
-        results_file = "C:\\polarimeter\\results_trace_rerunning\\results\\result_rerunning.txt"
-        #results_file = "/Users/malgorzatanguyen/Desktop/rerun.txt"
+        results_file = self.config["rerunning_results_file"]
         with open(results_file, 'w') as f:
-            data_folder_path = "C:\\polarimeter\\results_trace_rerunning\\"
-            #data_folder_path = "/Users/malgorzatanguyen/Desktop/results_trace1/"
+            data_folder_path = self.config["rerunning_data_folder"]
             acquirer = RecordedDataAcquirer(data_folder_path)
             p = Polarimeter()
             while acquirer.isDataAvailable():
@@ -77,14 +76,13 @@ class Runner():
         x = 7000 #how many flushes to file
         y = 10 #no of experiments in a single flush
         timestamp = int(time.time())
-        results_file = os.path.join(
-            "C:\\polarimeter\\results\\" + str(timestamp) + "_stab.txt")
+        results_file = os.path.join(self.config["laser_folder"] + str(timestamp) + "_stab.txt")
 
         with open(results_file, "w") as f:
             for _ in range(x):
                 for _ in range(y):
                     times = int(time.time())
-                    acquirer = RealDataAcquirer(1)
+                    acquirer = RealDataAcquirer(1, self.config)
                     one_acq = acquirer.acquire()
                     chA = one_acq[:,1]
                     chB = one_acq[:,2]
@@ -94,20 +92,23 @@ class Runner():
             f.flush()
 
 def main():
+    with open('config.json') as json_data_file:
+        config = json.load(json_data_file)
+
     parser = ArgumentParser()
     parser.add_argument("scenario", nargs=1)
     args = parser.parse_args()
     scenario = args.scenario[0]
     if scenario == 'experiment':
-        Runner().experiment()
+        Runner(config).experiment()
     elif scenario == 'exper_time':
-        Runner().exper_time()
+        Runner(config).exper_time()
     elif scenario == 'exper_time2':
-        Runner().exper_time2()
+        Runner(config).exper_time2()
     elif scenario == 'laser_stability':
-        Runner().laser_stability()
+        Runner(config).laser_stability()
     elif scenario == 'rerunning':
-        Runner().rerunning()
+        Runner(config).rerunning()
     else:
         raise Exception("Uknown scenario: {}".format(args.scenario))
 

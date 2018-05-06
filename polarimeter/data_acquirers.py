@@ -19,14 +19,15 @@ class IDataAcquirer(object):
         raise NotImplementedError("Method lastDataTimestamp() must be implemeted.")
 
 class RealDataAcquirer(IDataAcquirer):
-    def __init__(self, capture_time):
+    def __init__(self, capture_time, config):
         self.capture_time = capture_time
+        self.config = config
 
     def acquire(self):
         """Aquires data for capture_time (seconds) via acquisition PC.
         Returns time, and signals of hannel A and channel B.
         """
-        trigger_path = 'C:\\Users\\jdmgroup\\Desktop\\trigger.txt'
+        trigger_path = self.config["experiment_trigger_file"]
 
         with open(trigger_path,'w') as f:
             f.write("{}".format(self.capture_time))
@@ -38,11 +39,10 @@ class RealDataAcquirer(IDataAcquirer):
                 time.sleep(0.1)
 
         self.last_data_timestamp = str(int(time.time()))
-        filepath_old = "C:\\polarimeter\\trace.csv"
-        filepath_new = os.path.join("C:\\polarimeter\\results_trace\\" + self.last_data_timestamp + ".csv")
+        filepath_old = self.config["experiment_raw_data_file"]
+        filepath_new = os.path.join(self.config["experiment_raw_data_destination_folder"] + self.last_data_timestamp + ".csv")
         shutil.move(filepath_old, filepath_new)
 
-        #filepath_new = "/Users/maglorzatanguyen/Documents/IMPERIAL/Year_4/pol_combinations/trace_ref_7feb.csv"
         return np.loadtxt(filepath_new, delimiter=',', dtype=np.dtype('d'), unpack=True)
 
     def lastDataTimestamp(self):
